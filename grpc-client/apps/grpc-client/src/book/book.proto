@@ -1,0 +1,24 @@
+// 声明了正在使用 Protobuf 语言的第三版（也是当前的最新版）
+syntax = "proto3";
+
+// 定义了包名为 book。包名可以防止命名冲突，类似于 Java 的包或 C# 的命名空间
+package book;
+
+// 定义了一个名为 BookService 的 gRPC 服务。gRPC 是一个高性能、开源的通用 RPC 框架，它使用 Protobuf 作为接口定义语言。
+// 在这个服务中，定义了一个名为 FindBook 的方法，该方法接收一个 BookById 消息作为输入，并返回一个 Book 消息
+service BookService {
+  rpc FindBook (BookById) returns (Book) {}
+}
+
+// 定义了两个 Protobuf 消息。
+// BookById 消息有一个 id 字段，Book 消息有 id、name 和 desc 三个字段。
+// 每个字段都有一个唯一的数字标识符（例如，id 的标识符是 1），这些标识符在消息的二进制格式中用来识别字段
+message BookById {
+  int32 id = 1;
+}
+
+message Book {
+  int32 id = 1;
+  string name = 2;
+  string desc = 3;
+}
