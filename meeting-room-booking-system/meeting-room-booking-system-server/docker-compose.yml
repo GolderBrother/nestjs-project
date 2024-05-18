@@ -3,7 +3,7 @@ version: '3.8'
 services:
   fe-app:
     # 本地镜像
-    image: fe-container:first
+    # image: fe-container:first
     # 阿里云镜像仓库里的。
     image: registry.cn-shenzhen.aliyuncs.com/jamese_zhang/james:v1
     ports:
