@@ -1,7 +1,21 @@
 version: '3.8'
+name: 'meeting-room-booking-system-server2'
 services:
+  fe-app:
+    # 本地镜像
+    image: fe-container:first
+    # 阿里云镜像仓库里的。
+    image: registry.cn-shenzhen.aliyuncs.com/jamese_zhang/james:v1
+    ports:
+      - 80:80
+    depends_on:
+      - nest-app
+    networks:
+    # 三个容器放到同一个桥接网络里 common-network
+      - common-network
 # nest服务
 # nest-app 依赖 redis-container 和 mysql-container，因此下面两个环境依赖服务需要先启动
+# docker compose 跑的多个容器之间可以通过容器名相互访问
   nest-app:
     build:
       context: ./
@@ -10,8 +24,8 @@ services:
     depends_on:
       - mysql-container
       - redis-container
-    ports:
-      - 3005:3005
+    # ports:
+    #   - 3005:3005
     networks:
 # 三个容器放到同一个桥接网络里 common-network
       - common-network
@@ -19,8 +33,8 @@ services:
   mysql-container:
     image: mysql
     volumes:
-      # - /Users/zhangyaohuang/Desktop/james/self/mysql⁠:/var/lib/mysql
-      - /Users/james/mysql-data:/var/lib/mysql
+      - /Users/zhangyaohuang/Desktop/james/self/mysql⁠:/var/lib/mysql
+      # - /Users/james/mysql-data:/var/lib/mysql
     environment:
       MYSQL_DATABASE: meeting_room_booking_system
       MYSQL_ROOT_PASSWORD: root
@@ -30,8 +44,8 @@ services:
   redis-container:
     image: redis
     volumes:
-      # - /Users/zhangyaohuang/Desktop/james/self/redis⁠:/data
-      - /Users/james/redis-data:/data
+      - /Users/zhangyaohuang/Desktop/james/self/redis⁠:/data
+      # - /Users/james/redis-data:/data
     networks:
       - common-network
 # 三个容器放到同一个桥接网络里。

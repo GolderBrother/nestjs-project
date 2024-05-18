@@ -8,6 +8,7 @@ import { UnLoginFilter } from './filter/unlogin.filter';
 import { CustomExceptionFilter } from './filter/custom-exception.filter';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { NestExpressApplication } from '@nestjs/platform-express';
+import * as os from 'os';
 
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
@@ -38,6 +39,18 @@ async function bootstrap() {
     .build();
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('api-doc', app, document);
+
+  const getServerIP = () => {
+    const nets = os.networkInterfaces();
+    for (const name of Object.keys(nets)) {
+      for (const net of nets[name]) {
+        if (net.family === 'IPv4' && !net.internal) {
+          return net.address;
+        }
+      }
+    }
+  }
+  console.log(`getServerIP(),`, getServerIP());
 
   const configService = app.get(ConfigService);
   await app.listen(configService.get('nest_server_port'));
