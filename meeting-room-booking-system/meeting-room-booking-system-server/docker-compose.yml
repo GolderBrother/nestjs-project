@@ -1,5 +1,5 @@
 version: '3.8'
-name: 'meeting-room-booking-system-server2'
+# name: 'meeting-room-booking-system-server2'
 services:
   fe-app:
     # 本地镜像
