@@ -5,7 +5,7 @@ services:
     # 本地镜像
     # image: fe-container:first
     # 阿里云镜像仓库里的。
-    image: registry.cn-shenzhen.aliyuncs.com/jamese_zhang/james:v1
+    image: registry.cn-shenzhen.aliyuncs.com/jamese_zhang/james:v2
     ports:
       - 80:80
     depends_on:
