@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <input type="file" id="selector" multiple>
+    <button onclick="upload()">Upload</button>
+    <div id="status">No uploads</div>
+
+    <script type="text/javascript">
+        function upload() {
+            var files = document.querySelector("#selector").files;
+            console.log('files', files);
+            // 点击上传的时候遍历文件，对每个文件路径调用服务端的 presignedUrl 接口进行 url 签名
+            for (var i = 0; i < files.length; i++) {
+                var file = files[i];
+                retrieveNewURL(file, (file, url) => {
+                    // 用返回的 url 就可以直传服务端了
+                    uploadFile(file, url);
+                });
+            }
+        }
+
+        /**
+         * 获取服务端签名 url
+         * @param {*} file 
+         * @param {*} cb 
+         */
+        function retrieveNewURL(file, cb) {
+            fetch(`/presignedUrl?name=${file.name}`).then((response) => {
+                response.text().then((url) => {
+                    cb(file, url);
+                });
+            }).catch((e) => {
+                console.error(e);
+            });
+        }
+
+        /**
+         * 用返回的 url 直传服务端
+         * @param {*} file 
+         * @param {*} url 
+         */
+        function uploadFile(file, url) {
+            if (document.querySelector('#status').innerText === 'No uploads') {
+                document.querySelector('#status').innerHTML = '';
+            }
+            fetch(url, {
+                method: 'PUT',
+                body: file
+            }).then(() => {
+                document.querySelector('#status').innerHTML += `<br>Uploaded ${file.name}.`;
+            }).catch((e) => {
+                console.error(e);
+            });
+        }
+    </script>
+</body>
+</html>
