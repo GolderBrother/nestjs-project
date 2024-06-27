@@ -124,8 +124,7 @@ export class UserService {
         permissions: userInfo.permissions,
       },
       {
-        expiresIn:
-          this.configService.get('jwt_access_token_expires_time') || '30m',
+        expiresIn: this.configService.get('jwt_access_token_expires_time') || '30m',
       },
     );
     const refreshToken = this.jwtService.sign(
@@ -133,8 +132,7 @@ export class UserService {
         userId: userInfo.id,
       },
       {
-        expiresIn:
-          this.configService.get('jwt_refresh_token_expres_time') || '7d',
+        expiresIn: this.configService.get('jwt_refresh_token_expres_time') || '7d',
       },
     );
 
@@ -310,9 +308,7 @@ export class UserService {
   }
 
   async updatePassword(passwordDto: UpdateUserPasswordDto) {
-    const captcha = await this.redisService.get(
-      `update_password_captcha_${passwordDto.email}`,
-    );
+    const captcha = await this.redisService.get(`update_password_captcha_${passwordDto.email}`);
 
     // 验证码已失效
     if (!captcha) {
@@ -348,11 +344,7 @@ export class UserService {
 
   async updatePasswordCaptcha(address: string) {
     const code = Math.random().toString().slice(2, 8);
-    await this.redisService.set(
-      `update_password_captcha_${address}`,
-      code,
-      10 * 60,
-    );
+    await this.redisService.set(`update_password_captcha_${address}`, code, 10 * 60);
 
     await this.emailService.sendMail({
       to: address,
@@ -364,9 +356,7 @@ export class UserService {
 
   async update(userId: number, updateUserDto: UpdateUserDto) {
     console.log('userId', userId);
-    const captcha = await this.redisService.get(
-      `update_user_captcha_${updateUserDto.email}`,
-    );
+    const captcha = await this.redisService.get(`update_user_captcha_${updateUserDto.email}`);
 
     // 验证码已失效
     if (!captcha) {
@@ -430,8 +420,7 @@ export class UserService {
     pageNo: number,
     pageSize: number,
   ) {
-    const condition: Record<string, string | number | FindOperator<string>> =
-      {};
+    const condition: Record<string, string | number | FindOperator<string>> = {};
     if (username !== null) {
       condition.username = Like(`%${username}%`);
     }

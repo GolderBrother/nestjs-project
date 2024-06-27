@@ -8,6 +8,8 @@ import {
   UploadedFile,
   UseInterceptors,
   BadRequestException,
+  UseGuards,
+  Req,
 } from '@nestjs/common';
 import { UserService } from './user.service';
 import { RegisterUserDto } from './dto/register-user.dto';
@@ -16,13 +18,7 @@ import { RequireLogin, UserInfo } from 'src/decorator/custom.decorator';
 import { generateParseIntPipe } from 'src/utils';
 import { storage } from 'src/utils/file-storage';
 
-import {
-  ApiTags,
-  ApiQuery,
-  ApiResponse,
-  ApiBody,
-  ApiBearerAuth,
-} from '@nestjs/swagger';
+import { ApiTags, ApiQuery, ApiResponse, ApiBody, ApiBearerAuth } from '@nestjs/swagger';
 
 import { UserDetailVo } from './vo/user-info.vo';
 import { UpdateUserPasswordDto } from './dto/update-user-password.dto';
@@ -33,6 +29,7 @@ import { RefreshTokenVo } from './vo/refresh-token.vo';
 import { UserListVo } from './vo/user-list.vo';
 import { FileInterceptor } from '@nestjs/platform-express';
 import * as path from 'path';
+import { AuthGuard } from '@nestjs/passport';
 
 @ApiTags('用户管理模块')
 @Controller('user')
@@ -80,6 +77,7 @@ export class UserController {
     return await this.userService.registerCaptcha(address);
   }
 
+  @UseGuards(AuthGuard('local'))
   @Post('login')
   @ApiBody({
     type: LoginUserDto,
@@ -94,9 +92,14 @@ export class UserController {
     description: '用户信息和 token',
     type: LoginUserVo,
   })
-  async login(@Body() loginUser: LoginUserDto) {
-    console.log('login loginUser', loginUser);
-    const userVo = await this.userService.login(loginUser, false);
+  // async login(@Body() loginUser: LoginUserDto) {
+  //   console.log('login loginUser', loginUser);
+  //   const userVo = await this.userService.login(loginUser, false);
+  //   return userVo;
+  // }
+  async login(@UserInfo() userVo: LoginUserVo) {
+    console.log('login userVo', userVo);
+    // const userVo = await this.userService.login(loginUser, false);
     return userVo;
   }
   @Post('admin/login')
@@ -198,10 +201,7 @@ export class UserController {
     description: '用户信息修改成功/用户信息修改失败',
   })
   @Post('update')
-  async update(
-    @UserInfo('userId') userId: number,
-    @Body() updateUserDto: UpdateUserDto,
-  ) {
+  async update(@UserInfo('userId') userId: number, @Body() updateUserDto: UpdateUserDto) {
     return await this.userService.update(userId, updateUserDto);
   }
 
@@ -277,13 +277,7 @@ export class UserController {
     @Query('pageSize', generateParseIntPipe('pageNo'))
     pageSize: number,
   ) {
-    return await this.userService.findUsersByPage(
-      username,
-      nickName,
-      email,
-      pageNo,
-      pageSize,
-    );
+    return await this.userService.findUsersByPage(username, nickName, email, pageNo, pageSize);
   }
 
   @Post('upload')
@@ -307,5 +301,26 @@ export class UserController {
   )
   uploadFile(@UploadedFile() file: Express.Multer.File) {
     return this.userService.uploadFile(file);
+  }
+
+  // 触发登录
+  @Get('google')
+  @UseGuards(AuthGuard('google'))
+  async googleAuth() {
+    console.log('googleAuth');
+  }
+
+  // 触发google回调
+  @Get('callback/google')
+  @UseGuards(AuthGuard('google'))
+  googleAuthRedirect(@Req() req) {
+    if (!req.user) {
+      return 'No user from google';
+    }
+
+    return {
+      message: 'User information from google',
+      user: req.user,
+    };
   }
 }
