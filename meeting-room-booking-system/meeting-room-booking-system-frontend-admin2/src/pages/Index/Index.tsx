@@ -1,8 +1,16 @@
 import { UserOutlined } from "@ant-design/icons";
 import { Link, Outlet } from "react-router-dom";
+import { useEffect } from 'react';
 import './index.css';
 
 export function Index() {
+	useEffect(()=> {
+		const userInfo = localStorage.getItem('user_info');
+		if(!userInfo) {
+			window.location.href = "/login";
+		}
+	}, []);
+	
 	return <div id="index-container">
 		<div className="header">
 			<Link to="/" className="sys_name">
