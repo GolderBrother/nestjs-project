@@ -46,6 +46,8 @@ export function Login() {
     }
   }, []);
 
+  // 点击 Google 登录按钮的时候修改 location.href 为 /user/google 触发 Google 账号登录授权。
+  // 授权后会回调 /user/callback/google，我们在接口查询了用户信息，通过 cookie 返回 userInfo 和 jwt 的 token，然后重定向到首页。
   const handleGoogleLogin = () => {
     window.location.href = "http://localhost:3005/user/google";
   }
