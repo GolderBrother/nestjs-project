@@ -10,6 +10,7 @@ import {
   BadRequestException,
   UseGuards,
   Req,
+  Inject,
 } from '@nestjs/common';
 import { UserService } from './user.service';
 import { RegisterUserDto } from './dto/register-user.dto';
@@ -30,11 +31,15 @@ import { UserListVo } from './vo/user-list.vo';
 import { FileInterceptor } from '@nestjs/platform-express';
 import * as path from 'path';
 import { AuthGuard } from '@nestjs/passport';
+import { RedisService } from 'src/redis/redis.service';
 
 @ApiTags('用户管理模块')
 @Controller('user')
 export class UserController {
   constructor(private readonly userService: UserService) {}
+
+  @Inject(RedisService)
+  private redisService: RedisService;
 
   @Get('init-data')
   async initData() {
@@ -173,8 +178,10 @@ export class UserController {
   })
   @Post(['update_password', 'admin/update_password'])
   async updatePassword(@Body() updatePasswordDto: UpdateUserPasswordDto) {
-    console.log('updatePasswordDto', updatePasswordDto);
-    return this.userService.updatePassword(updatePasswordDto);
+    const res = await this.userService.updatePassword(updatePasswordDto);
+    // 验证码用完之后就从 redis 中删掉
+    this.redisService.del(`update_user_captcha_${updatePasswordDto.email}`);
+    return res;
   }
 
   @ApiQuery({
@@ -202,7 +209,10 @@ export class UserController {
   })
   @Post('update')
   async update(@UserInfo('userId') userId: number, @Body() updateUserDto: UpdateUserDto) {
-    return await this.userService.update(userId, updateUserDto);
+    const res = await this.userService.update(userId, updateUserDto);
+    // 验证码用完之后就从 redis 中删掉
+    this.redisService.del(`update_user_captcha_${updateUserDto.email}`);
+    return res;
   }
 
   @ApiBearerAuth()

@@ -1,19 +1,20 @@
 import { IsEmail, IsNotEmpty, MinLength } from 'class-validator';
 
-import { ApiProperty } from '@nestjs/swagger';
+import { ApiProperty, PickType } from '@nestjs/swagger';
+import { LoginUserDto } from './login-user.dto';
 
 /**
  * 注册用户数据传输对象
  */
-export class RegisterUserDto {
+export class RegisterUserDto extends PickType(LoginUserDto, ['username', 'password']) {
   /**
    * 用户名
    */
-  @IsNotEmpty({
-    message: '用户名不能为空',
-  })
-  @ApiProperty()
-  username: string;
+  // @IsNotEmpty({
+  //   message: '用户名不能为空',
+  // })
+  // @ApiProperty()
+  // username: string;
 
   /**
    * 昵称
@@ -33,8 +34,8 @@ export class RegisterUserDto {
   @MinLength(6, {
     message: '密码不能少于 6 位',
   })
-  @ApiProperty()
-  password: string;
+  // @ApiProperty()
+  // password: string;
 
   /**
    * 邮箱

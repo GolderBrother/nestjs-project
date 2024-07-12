@@ -43,7 +43,7 @@ import 'winston-daily-rotate-file';
       // 开发环境下
       // envFilePath: 'src/.env',
       // 生产环境下：因为 build 出来的代码没有 src 目录，是直接放在 dist 下的
-      envFilePath: path.join(__dirname, '.env'),
+      envFilePath: [path.join(__dirname, '.env'), path.join(__dirname, '.dev.env')],
     }),
     TypeOrmModule.forRootAsync({
       useFactory(configService: ConfigService, logger: WinstonLogger) {

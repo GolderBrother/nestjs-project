@@ -1,21 +1,21 @@
 version: '3.8'
 # name: 'meeting-room-booking-system-server2'
 services:
-  fe-app:
-    # 本地镜像
-    # image: fe-container:first
-    # 阿里云镜像仓库里的。
-    image: registry.cn-shenzhen.aliyuncs.com/jamese_zhang/james:v2
-    ports:
-      - 80:80
-    depends_on:
-      - nest-app
-    networks:
-    # 三个容器放到同一个桥接网络里 common-network
-      - common-network
-# nest服务
-# nest-app 依赖 redis-container 和 mysql-container，因此下面两个环境依赖服务需要先启动
-# docker compose 跑的多个容器之间可以通过容器名相互访问
+  # fe-app:
+  #   # 本地镜像
+  #   # image: fe-container:first
+  #   # 阿里云镜像仓库里的。
+  #   image: registry.cn-shenzhen.aliyuncs.com/jamese_zhang/james:v2
+  #   ports:
+  #     - 80:80
+  #   depends_on:
+  #     - nest-app
+  #   networks:
+  #     # 三个容器放到同一个桥接网络里 common-network
+  #     - common-network
+  # nest服务
+  # nest-app 依赖 redis-container 和 mysql-container，因此下面两个环境依赖服务需要先启动
+  # docker compose 跑的多个容器之间可以通过容器名相互访问
   nest-app:
     build:
       context: ./
@@ -27,27 +27,45 @@ services:
     # ports:
     #   - 3005:3005
     networks:
-# 三个容器放到同一个桥接网络里 common-network
+      # 三个容器放到同一个桥接网络里 common-network
       - common-network
-# mysql服务
+    restart: always
+  # mysql服务
   mysql-container:
     image: mysql
     volumes:
-      - /Users/zhangyaohuang/Desktop/james/self/mysql⁠:/var/lib/mysql
+      - /Users/zhangyaohuang/Desktop/james/self/mysql:/var/lib/mysql
       # - /Users/james/mysql-data:/var/lib/mysql
+    command: mysqld --character-set-server=utf8mb4 --collation-server=utf8mb4_general_ci # 设置默认字符集
     environment:
       MYSQL_DATABASE: meeting_room_booking_system
       MYSQL_ROOT_PASSWORD: root
     networks:
       - common-network
-# redis服务 
+    restart: always
+  # redis服务
   redis-container:
     image: redis
     volumes:
-      - /Users/zhangyaohuang/Desktop/james/self/redis⁠:/data
+      - /Users/zhangyaohuang/Desktop/james/self/redis:/data
       # - /Users/james/redis-data:/data
     networks:
       - common-network
+    restart: always
+  minio-container:
+    image: bitnami/minio:latest
+    ports:
+      - 9000:9000
+      - 9001:9001
+    volumes:
+      - /Users/zhangyaohuang/Desktop/james/self/minio
+    environment:
+      MINIO_ROOT_USER: james
+      MINIO_ROOT_PASSWORD: jameszyh
+    networks:
+      - common-network
+    restart: always
+
 # 三个容器放到同一个桥接网络里。
 networks:
   common-network:
