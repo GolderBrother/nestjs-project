@@ -1,8 +1,25 @@
 import { Injectable } from '@nestjs/common';
 import { createTransport, Transporter } from 'nodemailer';
+import { CreateEmailDto } from './dto/create-email.dto';
+import { UpdateEmailDto } from './dto/update-email.dto';
 
 @Injectable()
 export class EmailService {
+  remove(arg0: number) {
+    throw new Error('Method not implemented.');
+  }
+  update(arg0: number, updateEmailDto: UpdateEmailDto) {
+    throw new Error('Method not implemented.');
+  }
+  findOne(arg0: number) {
+    throw new Error('Method not implemented.');
+  }
+  findAll() {
+    throw new Error('Method not implemented.');
+  }
+  create(createEmailDto: CreateEmailDto) {
+    throw new Error('Method not implemented.');
+  }
   transporter: Transporter;
 
   constructor() {
@@ -21,7 +38,7 @@ export class EmailService {
     await this.transporter.sendMail({
       from: {
         name: '聊天室',
-        address: '1581994988@qq.com',
+        address: '1204788939@qq.com',
       },
       to,
       subject,
