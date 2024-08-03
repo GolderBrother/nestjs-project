@@ -106,15 +106,15 @@ export class UserService {
         username: loginUserDto.username
       }
     });
-  
-    if(!foundUser) {
-        throw new HttpException('用户不存在', HttpStatus.BAD_REQUEST);
+
+    if (!foundUser) {
+      throw new HttpException('用户不存在', HttpStatus.BAD_REQUEST);
     }
-  
-    if(foundUser.password !== loginUserDto.password) {
-        throw new HttpException('密码错误', HttpStatus.BAD_REQUEST);
+
+    if (foundUser.password !== loginUserDto.password) {
+      throw new HttpException('密码错误', HttpStatus.BAD_REQUEST);
     }
-  
+
     delete foundUser.password;
     return foundUser;
   }
@@ -131,5 +131,5 @@ export class UserService {
     });
     return 'success';
   }
-  
+
 }

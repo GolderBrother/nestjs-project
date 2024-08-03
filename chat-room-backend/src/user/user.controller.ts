@@ -17,10 +17,11 @@ import { EmailService } from 'src/email/email.service';
 import { RedisService } from 'src/redis/redis.service';
 import { Prisma } from '@prisma/client';
 import { LoginUserDto } from './dto/login-user.dto';
+import { JwtService } from '@nestjs/jwt';
 
 @Controller('user')
 export class UserController {
-  constructor(private readonly userService: UserService) {}
+  constructor(private readonly userService: UserService) { }
 
   @Inject(EmailService)
   private emailService: EmailService;
@@ -28,30 +29,8 @@ export class UserController {
   @Inject(RedisService)
   private redisService: RedisService;
 
-  // @Post()
-  // create(@Body() createUserDto: Prisma.UserCreateInput) {
-  //   return this.userService.create(createUserDto);
-  // }
-
-  @Get()
-  findAll() {
-    return this.userService.findAll();
-  }
-
-  // @Get(':id')
-  // findOne(@Param('id') id: string) {
-  //   return this.userService.findOne(+id);
-  // }
-
-  // @Patch(':id')
-  // update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
-  //   return this.userService.update(+id, updateUserDto);
-  // }
-
-  // @Delete(':id')
-  // remove(@Param('id') id: string) {
-  //   return this.userService.remove(+id);
-  // }
+  @Inject(JwtService)
+  private jwtService: JwtService
 
   @Get('/register-captcha')
   async captcha(@Query('address') address: string) {
@@ -67,10 +46,44 @@ export class UserController {
   async register(@Body() registerUser: RegisterUserDto) {
     return await this.userService.register(registerUser);
   }
+
   @Post('login')
-  async userLogin(loginUser: LoginUserDto) {
+  async userLogin(@Body() loginUser: LoginUserDto) {
     const user = await this.userService.login(loginUser);
 
-    return user;
+    return {
+      user,
+      token: this.jwtService.sign({
+        userId: user.id,
+        username: user.username
+      }, {
+        expiresIn: '7d'
+      })
+    };
+  }
+
+  @Get()
+  findAll() {
+    return this.userService.findAll();
+  }
+
+  @Get(':id')
+  findOne(@Param('id') id: string) {
+    return this.userService.findOne(+id);
+  }
+
+  @Post()
+  create(@Body() createUserDto: Prisma.UserCreateInput) {
+    return this.userService.create(createUserDto);
+  }
+
+  @Patch(':id')
+  update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
+    return this.userService.update(+id, updateUserDto);
+  }
+
+  @Delete(':id')
+  remove(@Param('id') id: string) {
+    return this.userService.remove(+id);
   }
 }
