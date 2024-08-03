@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   HttpException,
   HttpStatus,
   Inject,
@@ -13,6 +14,7 @@ import { RedisService } from 'src/redis/redis.service';
 import { RegisterUserDto } from './dto/register-user.dto';
 import { LoginUserDto } from './dto/login-user.dto';
 import { EmailService } from 'src/email/email.service';
+import { UpdateUserPasswordDto } from './dto/update-user-pasword.dto';
 
 @Injectable()
 export class UserService {
@@ -38,6 +40,23 @@ export class UserService {
     return res;
   }
 
+  async findUserDetailById(userId: number) {
+    const user = await this.prismaService.user.findUnique({
+      where: {
+        id: userId
+      },
+      select: {
+        id: true,
+        username: true,
+        nickName: true,
+        email: true,
+        headPic: true,
+        createTime: true
+      }
+    })
+    return user;
+  }
+
   findAll() {
     return `This action returns all user`;
   }
@@ -46,8 +65,44 @@ export class UserService {
     return `This action returns a #${id} user`;
   }
 
-  update(id: number, updateUserDto: UpdateUserDto) {
-    return `This action updates a #${id} user`;
+  async update(userId: number, updateUserDto: UpdateUserDto) {
+    const captcha = await this.redisService.get(`update_user_captcha_${updateUserDto.email}`);
+    if (!captcha) {
+      throw new HttpException('验证码已失效', HttpStatus.BAD_REQUEST);
+    }
+
+    if (updateUserDto.captcha !== captcha) {
+      throw new HttpException('验证码不正确', HttpStatus.BAD_REQUEST);
+    }
+
+    // 根据 userId 查询用户，修改信息后 update 到数据库。
+    const foundUser = await this.findUserDetailById(userId);
+
+    if (foundUser) {
+      if (updateUserDto.nickName) {
+        foundUser.nickName = updateUserDto.nickName;
+      }
+      if (updateUserDto.headPic) {
+        foundUser.headPic = updateUserDto.headPic;
+      }
+      if (updateUserDto.email) {
+        foundUser.email = updateUserDto.email;
+        // await this.redisService.set(`update_user_captcha_`)
+      }
+      try {
+        await this.prismaService.user.update({
+          where: {
+            id: userId
+          },
+          data: foundUser
+        })
+        return '用户信息修改成功';
+      } catch (error) {
+        this.logger.error(error, UserService);
+        return '用户信息修改失败'; 
+      }
+    }
+    return `This action updates a #${userId} user`;
   }
 
   remove(id: number) {
@@ -132,4 +187,64 @@ export class UserService {
     return 'success';
   }
 
+  async updatePassword(updatePasswordDto: UpdateUserPasswordDto) {
+    console.log('updatePasswordDto', updatePasswordDto);
+    // 先查询 redis 中相对应的验证码，检查通过之后根据 email 查询用户信息，修改密码之后 save。
+    const captcha = await this.redisService.get(`update_password_captcha_${updatePasswordDto.email}`)
+
+    if (!captcha) {
+      throw new HttpException('验证码已失效', HttpStatus.BAD_REQUEST);
+    }
+
+    if (updatePasswordDto.captcha !== captcha) {
+      throw new HttpException('验证码不正确', HttpStatus.BAD_REQUEST);
+    }
+
+    const foundUser = await this.prismaService.user.findUnique({
+      where: {
+        username: updatePasswordDto.username
+      }
+    })
+
+    foundUser.password = updatePasswordDto.password;
+
+    try {
+      await this.prismaService.user.update({
+        where: {
+          id: foundUser.id
+        },
+        data: foundUser
+      })
+      return '密码修改成功';
+    } catch (error) {
+      this.logger.error(error, UserService)
+      return '密码修改失败';
+    }
+  }
+
+  async updateCaptcha(userId: number, emailConfig = {
+    subject: '更改用户信息验证码',
+  }) {
+    if(!userId) {
+      throw new BadRequestException('用户ID不能为空');
+    }
+    const { email: address } = await this.findUserDetailById(userId)
+    return await this.sendCaptcha(address, emailConfig)
+  }
+
+  async sendCaptcha(address: string, emailConfig = {
+    subject: '更改用户信息验证码',
+  }) {
+    if(!address) {
+      throw new BadRequestException('邮箱地址不能为空');
+    }
+    const code = Math.random().toString().slice(2, 8);
+    await this.redisService.set(`update_user_captcha_${address}`, code, 5 * 60);
+    await this.emailService.sendMail({
+      to: address,
+      subject: emailConfig.subject || '更改用户信息验证码',
+      html: `<p>你的验证码是 ${code}</p>`
+    })
+    return '验证码发送成功'
+  }
 }

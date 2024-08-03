@@ -18,6 +18,8 @@ import { RedisService } from 'src/redis/redis.service';
 import { Prisma } from '@prisma/client';
 import { LoginUserDto } from './dto/login-user.dto';
 import { JwtService } from '@nestjs/jwt';
+import { RequireLogin, UserInfo } from 'src/custom.decorator';
+import { UpdateUserPasswordDto } from './dto/update-user-pasword.dto';
 
 @Controller('user')
 export class UserController {
@@ -67,6 +69,13 @@ export class UserController {
     return this.userService.findAll();
   }
 
+  @Get('info')
+  @RequireLogin()
+  async info(@UserInfo('userId') userId: number) {
+    return await this.userService.findUserDetailById(userId);
+  }
+
+
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.userService.findOne(+id);
@@ -77,13 +86,37 @@ export class UserController {
     return this.userService.create(createUserDto);
   }
 
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
-    return this.userService.update(+id, updateUserDto);
+  @Post('update')
+  @RequireLogin()
+  update(@UserInfo('userId') userId: number, @Body() updateUserDto: UpdateUserDto) {
+    return this.userService.update(userId, updateUserDto);
   }
+
+  // @Patch(':id')
+  // update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
+  //   return this.userService.update(+id, updateUserDto);
+  // }
 
   @Delete(':id')
   remove(@Param('id') id: string) {
     return this.userService.remove(+id);
+  }
+
+  @Post('update_password')
+  async updatePassword(@Body() updatePasswordDto: UpdateUserPasswordDto) {
+    return await this.userService.updatePassword(updatePasswordDto)
+  }
+
+  @Post('update_captcha')
+  @RequireLogin()
+  async updateCaptcha(@UserInfo('userId') userId: number) {
+    return await this.userService.updateCaptcha(userId);
+  }
+
+  @Post('send_captcha')
+  async sendCaptcha(@Body('email') email: string) {
+    return await this.userService.sendCaptcha(email, {
+      subject: '发送验证码'
+    });
   }
 }
