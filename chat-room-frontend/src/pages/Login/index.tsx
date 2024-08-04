@@ -1,15 +1,12 @@
-import { Button, Checkbox, Form, Input } from 'antd';
+import { Button, message, Form, Input } from 'antd';
 import './index.css';
+import { login } from '../../api';
+import { useNavigate } from 'react-router-dom';
 
 interface LoginUser {
     username: string;
     password: string;
 }
-
-const onFinish = (values: LoginUser) => {
-    console.log(values);
-};
-
 
 const layout1 = {
     labelCol: { span: 4 },
@@ -22,6 +19,26 @@ const layout2 = {
 }
 
 export function Login() {
+
+
+    const navigate = useNavigate();
+    const onFinish = async (values: LoginUser) => {
+        try {
+            const res = await login(values.username, values.password);
+            if (res.status === 201 || res.status === 200) {
+                message.success('登录成功', 1000, () => {
+                    localStorage.setItem('token', res.data.token);
+                    localStorage.setItem('userInfo', JSON.stringify(res.data.user));
+                    navigate('/')
+                });
+
+            }
+        } catch (e: unknown) {
+            message.error(e.response?.data?.message || '系统繁忙，请稍后再试');
+        }
+    };
+
+
     return <div id="login-container">
         <h1>聊天室</h1>
         <Form
@@ -63,5 +80,5 @@ export function Login() {
                 </Button>
             </Form.Item>
         </Form>
-    </div>   
+    </div>
 }
