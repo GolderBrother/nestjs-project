@@ -18,6 +18,37 @@ import { UpdateUserPasswordDto } from './dto/update-user-pasword.dto';
 
 @Injectable()
 export class UserService {
+  async friendship(userId: number) {
+    const foundUser = await this.prismaService.user.findUnique({
+      where: {
+        id: userId
+      },
+      include: {
+        // 当前用户的好友关系
+        friends: true,
+        // 他是哪些人的好友
+        // inverseFriends: true
+      }
+    })
+    if (foundUser) {
+      const friendIdList = foundUser.friends.map(item => item.friendId);
+      const data = await this.prismaService.user.findMany({
+        where: {
+          id: {
+            in: friendIdList
+          }
+        },
+        select: {
+          id: true,
+          username: true,
+          nickName: true,
+          email: true
+        }
+      })
+      return data
+    }
+    return foundUser
+  }
   @Inject(PrismaService)
   private prismaService: PrismaService;
 
@@ -110,16 +141,14 @@ export class UserService {
   }
   async register(user: RegisterUserDto) {
     // 先检查验证码是否正确，如果正确的话，检查用户是否存在，然后用 prismaService.create 插入数据。
-    const captcha = await this.redisService.get(`captcha_${user.email}`);
-    this.logger.log(`user.email: ${user.email}`);
-    this.logger.log(`captcha: ${captcha}`);
-    if (!captcha) {
-      throw new HttpException('验证码已失效', HttpStatus.BAD_REQUEST);
-    }
+    // const captcha = await this.redisService.get(`captcha_${user.email}`);
+    // if (!captcha) {
+    //   throw new HttpException('验证码已失效', HttpStatus.BAD_REQUEST);
+    // }
 
-    if (user.captcha !== captcha) {
-      throw new HttpException('验证码不正确', HttpStatus.BAD_REQUEST);
-    }
+    // if (user.captcha !== captcha) {
+    //   throw new HttpException('验证码不正确', HttpStatus.BAD_REQUEST);
+    // }
 
     const foundUser = await this.prismaService.user.findUnique({
       where: {

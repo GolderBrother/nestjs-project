@@ -8,6 +8,7 @@ import { EmailModule } from './email/email.module';
 import { JwtModule } from '@nestjs/jwt';
 import { APP_GUARD } from '@nestjs/core';
 import { AuthGuard } from './auth/auth.guard';
+import { FriendshipModule } from './friendship/friendship.module';
 
 @Module({
   imports: [PrismaModule, UserModule, RedisModule, EmailModule, JwtModule.registerAsync({
@@ -20,7 +21,7 @@ import { AuthGuard } from './auth/auth.guard';
         }
       }
     }
-  })],
+  }), FriendshipModule],
   controllers: [AppController],
   providers: [AppService, {
     provide: APP_GUARD,

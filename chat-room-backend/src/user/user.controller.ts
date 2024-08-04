@@ -76,10 +76,10 @@ export class UserController {
   }
 
 
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.userService.findOne(+id);
-  }
+  // @Get(':id')
+  // findOne(@Param('id') id: string) {
+  //   return this.userService.findOne(+id);
+  // }
 
   @Post()
   create(@Body() createUserDto: Prisma.UserCreateInput) {
@@ -118,5 +118,11 @@ export class UserController {
     return await this.userService.sendCaptcha(email, {
       subject: '发送验证码'
     });
+  }
+
+  @Get('friendship')
+  @RequireLogin()
+  async friendship(@UserInfo('userId') userId: number) {
+    return await this.userService.friendship(userId)
   }
 }
