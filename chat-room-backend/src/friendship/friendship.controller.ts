@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, Inject, Param, Post, Query } from '@nestjs/common';
+import { BadRequestException, Body, Controller, Delete, Get, Inject, Param, Post, Query } from '@nestjs/common';
 import { FriendshipService } from './friendship.service';
 import { RequireLogin, UserInfo } from 'src/custom.decorator';
 import { FriendAddDto } from './dto/friend-add.dto';
@@ -21,12 +21,17 @@ export class FriendshipController {
 
   @Get('agree/:id')
   async agree(@Param('id') friendId: number, @UserInfo('userId') userId: number) {
+    if (!friendId) {
+      throw new BadRequestException('添加的好友 id 不能为空')
+    }
     return await this.friendshipService.agree(friendId, userId);
-
   }
 
   @Get('reject/:id')
   async reject(@Param('id') friendId: number, @UserInfo('userId') userId: number) {
+    if (!friendId) {
+      throw new BadRequestException('拒绝的好友 id 不能为空')
+    }
     return await this.friendshipService.reject(friendId, userId);
   }
 

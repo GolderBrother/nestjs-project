@@ -13,16 +13,6 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model Friendship {
-  user   User @relation("userToFriend", fields: [userId], references: [id])
-  userId Int
-
-  friend   User @relation("friendToUser", fields: [friendId], references: [id])
-  friendId Int
-
-  @@id([userId, friendId])
-}
-
 model User {
   id         Int      @id @default(autoincrement())
   username   String   @unique @db.VarChar(50)
@@ -39,6 +29,7 @@ model User {
   inverseFriends Friendship[] @relation("friendToUser")
 }
 
+// 添加好友申请表
 model FriendRequest {
   id         Int      @id @default(autoincrement())
   // 请求发送方
@@ -52,3 +43,34 @@ model FriendRequest {
   createTime DateTime @default(now())
   updateTime DateTime @updatedAt
 }
+
+// 好友列表表
+model Friendship {
+  user   User @relation("userToFriend", fields: [userId], references: [id])
+  userId Int
+
+  friend   User @relation("friendToUser", fields: [friendId], references: [id])
+  friendId Int
+
+  @@id([userId, friendId])
+}
+
+// 聊天室信息
+model Chatroom {
+  id         Int      @id @default(autoincrement())
+  name       String   @db.VarChar(50)
+  // 聊天室类型 true 群聊 false 单聊
+  type       Boolean  @default(false)
+  createTime DateTime @default(now())
+  updateTime DateTime @updatedAt
+}
+
+// 聊天室里有哪些用户，或者说用户在哪些聊天室
+model UserChatroom {
+  userId    Int 
+  chatroomId  Int
+
+  // 定义了一个复合主键，由 userId 和 chatroomId 共同组成
+  @@id([userId, chatroomId])
+}
+
