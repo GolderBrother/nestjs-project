@@ -19,14 +19,12 @@ const layout2 = {
 }
 
 export function Login() {
-
-
     const navigate = useNavigate();
     const onFinish = async (values: LoginUser) => {
         try {
             const res = await login(values.username, values.password);
             if (res.status === 201 || res.status === 200) {
-                message.success('登录成功', 1000, () => {
+                message.success('登录成功', 1, () => {
                     localStorage.setItem('token', res.data.token);
                     localStorage.setItem('userInfo', JSON.stringify(res.data.user));
                     navigate('/')

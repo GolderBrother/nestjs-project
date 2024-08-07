@@ -23,7 +23,7 @@ import { UpdateUserPasswordDto } from './dto/update-user-pasword.dto';
 
 @Controller('user')
 export class UserController {
-  constructor(private readonly userService: UserService) { }
+  constructor(private readonly userService: UserService) {}
 
   @Inject(EmailService)
   private emailService: EmailService;
@@ -32,7 +32,7 @@ export class UserController {
   private redisService: RedisService;
 
   @Inject(JwtService)
-  private jwtService: JwtService
+  private jwtService: JwtService;
 
   @Get('/register-captcha')
   async captcha(@Query('address') address: string) {
@@ -55,12 +55,15 @@ export class UserController {
 
     return {
       user,
-      token: this.jwtService.sign({
-        userId: user.id,
-        username: user.username
-      }, {
-        expiresIn: '7d'
-      })
+      token: this.jwtService.sign(
+        {
+          userId: user.id,
+          username: user.username,
+        },
+        {
+          expiresIn: '7d',
+        },
+      ),
     };
   }
 
@@ -75,7 +78,6 @@ export class UserController {
     return await this.userService.findUserDetailById(userId);
   }
 
-
   // @Get(':id')
   // findOne(@Param('id') id: string) {
   //   return this.userService.findOne(+id);
@@ -88,10 +90,18 @@ export class UserController {
 
   @Post('update')
   @RequireLogin()
-  update(@UserInfo('userId') userId: number, @Body() updateUserDto: UpdateUserDto) {
+  update(
+    @UserInfo('userId') userId: number,
+    @Body() updateUserDto: UpdateUserDto,
+  ) {
     return this.userService.update(userId, updateUserDto);
   }
 
+  @Post('update/captcha')
+  @RequireLogin()
+  async updateCaptcha(@UserInfo('userId') userId: number) {
+    return await this.userService.updateInfoCaptcha(userId);
+  }
   // @Patch(':id')
   // update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
   //   return this.userService.update(+id, updateUserDto);
@@ -104,25 +114,25 @@ export class UserController {
 
   @Post('update_password')
   async updatePassword(@Body() updatePasswordDto: UpdateUserPasswordDto) {
-    return await this.userService.updatePassword(updatePasswordDto)
+    return await this.userService.updatePassword(updatePasswordDto);
   }
 
-  @Post('update_captcha')
+  @Post('update_password/captcha')
   @RequireLogin()
-  async updateCaptcha(@UserInfo('userId') userId: number) {
-    return await this.userService.updateCaptcha(userId);
+  async updatePasswordCaptcha(@UserInfo('userId') userId: number) {
+    return await this.userService.updatePasswordCaptcha(userId);
   }
 
-  @Post('send_captcha')
-  async sendCaptcha(@Body('email') email: string) {
-    return await this.userService.sendCaptcha(email, {
-      subject: '发送验证码'
-    });
-  }
+  // @Post('send_captcha')
+  // async sendCaptcha(@Body('email') email: string) {
+  //   return await this.userService.sendCaptcha(email, {
+  //     subject: '发送验证码',
+  //   });
+  // }
 
   @Get('friendship')
   @RequireLogin()
   async friendship(@UserInfo('userId') userId: number) {
-    return await this.userService.friendship(userId)
+    return await this.userService.friendship(userId);
   }
 }

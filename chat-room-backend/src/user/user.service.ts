@@ -21,33 +21,33 @@ export class UserService {
   async friendship(userId: number) {
     const foundUser = await this.prismaService.user.findUnique({
       where: {
-        id: userId
+        id: userId,
       },
       include: {
         // 当前用户的好友关系
         friends: true,
         // 他是哪些人的好友
         // inverseFriends: true
-      }
-    })
+      },
+    });
     if (foundUser) {
-      const friendIdList = foundUser.friends.map(item => item.friendId);
+      const friendIdList = foundUser.friends.map((item) => item.friendId);
       const data = await this.prismaService.user.findMany({
         where: {
           id: {
-            in: friendIdList
-          }
+            in: friendIdList,
+          },
         },
         select: {
           id: true,
           username: true,
           nickName: true,
-          email: true
-        }
-      })
-      return data
+          email: true,
+        },
+      });
+      return data;
     }
-    return foundUser
+    return foundUser;
   }
   @Inject(PrismaService)
   private prismaService: PrismaService;
@@ -67,14 +67,14 @@ export class UserService {
         id: true,
       },
     });
-    this.logger.log(`adds a new user success`)
+    this.logger.log(`adds a new user success`);
     return res;
   }
 
   async findUserDetailById(userId: number) {
     const user = await this.prismaService.user.findUnique({
       where: {
-        id: userId
+        id: userId,
       },
       select: {
         id: true,
@@ -82,9 +82,9 @@ export class UserService {
         nickName: true,
         email: true,
         headPic: true,
-        createTime: true
-      }
-    })
+        createTime: true,
+      },
+    });
     return user;
   }
 
@@ -97,7 +97,9 @@ export class UserService {
   }
 
   async update(userId: number, updateUserDto: UpdateUserDto) {
-    const captcha = await this.redisService.get(`update_user_captcha_${updateUserDto.email}`);
+    const captcha = await this.redisService.get(
+      `update_user_captcha_${updateUserDto.email}`,
+    );
     if (!captcha) {
       throw new HttpException('验证码已失效', HttpStatus.BAD_REQUEST);
     }
@@ -123,14 +125,14 @@ export class UserService {
       try {
         await this.prismaService.user.update({
           where: {
-            id: userId
+            id: userId,
           },
-          data: foundUser
-        })
+          data: foundUser,
+        });
         return '用户信息修改成功';
       } catch (error) {
         this.logger.error(error, UserService);
-        return '用户信息修改失败'; 
+        return '用户信息修改失败';
       }
     }
     return `This action updates a #${userId} user`;
@@ -187,8 +189,8 @@ export class UserService {
   async login(loginUserDto: LoginUserDto) {
     const foundUser = await this.prismaService.user.findUnique({
       where: {
-        username: loginUserDto.username
-      }
+        username: loginUserDto.username,
+      },
     });
 
     if (!foundUser) {
@@ -219,7 +221,9 @@ export class UserService {
   async updatePassword(updatePasswordDto: UpdateUserPasswordDto) {
     console.log('updatePasswordDto', updatePasswordDto);
     // 先查询 redis 中相对应的验证码，检查通过之后根据 email 查询用户信息，修改密码之后 save。
-    const captcha = await this.redisService.get(`update_password_captcha_${updatePasswordDto.email}`)
+    const captcha = await this.redisService.get(
+      `update_password_captcha_${updatePasswordDto.email}`,
+    );
 
     if (!captcha) {
       throw new HttpException('验证码已失效', HttpStatus.BAD_REQUEST);
@@ -231,49 +235,74 @@ export class UserService {
 
     const foundUser = await this.prismaService.user.findUnique({
       where: {
-        username: updatePasswordDto.username
-      }
-    })
+        username: updatePasswordDto.username,
+      },
+    });
 
     foundUser.password = updatePasswordDto.password;
 
     try {
       await this.prismaService.user.update({
         where: {
-          id: foundUser.id
+          id: foundUser.id,
         },
-        data: foundUser
-      })
+        data: foundUser,
+      });
       return '密码修改成功';
     } catch (error) {
-      this.logger.error(error, UserService)
+      this.logger.error(error, UserService);
       return '密码修改失败';
     }
   }
 
-  async updateCaptcha(userId: number, emailConfig = {
-    subject: '更改用户信息验证码',
-  }) {
-    if(!userId) {
+  async updatePasswordCaptcha(userId: number) {
+    if (!userId) {
       throw new BadRequestException('用户ID不能为空');
     }
-    const { email: address } = await this.findUserDetailById(userId)
-    return await this.sendCaptcha(address, emailConfig)
+    const { email: address } = await this.findUserDetailById(userId);
+    const emailConfig = {
+      to: address,
+      subject: '更改密码验证码',
+      htmlPrefix: `你的更改密码验证码是: `,
+    };
+    const updateCaptchaKey = 'update_password_captcha_';
+    return await this.sendCaptcha(address, emailConfig, updateCaptchaKey);
   }
 
-  async sendCaptcha(address: string, emailConfig = {
-    subject: '更改用户信息验证码',
-  }) {
-    if(!address) {
+  async updateInfoCaptcha(userId: number) {
+    console.log('updateInfoCaptcha userId', userId);
+    if (!userId) {
+      throw new BadRequestException('用户ID不能为空');
+    }
+    const { email: address } = await this.findUserDetailById(userId);
+    console.log('updateInfoCaptcha address', address);
+    const emailConfig = {
+      to: address,
+      subject: '更改用户信息验证码',
+      htmlPrefix: `你的验证码是: `,
+    };
+    const updateCaptchaKey = 'update_user_captcha_';
+    return await this.sendCaptcha(address, emailConfig, updateCaptchaKey);
+  }
+
+  async sendCaptcha(
+    address: string,
+    emailConfig = {
+      subject: '更改用户信息验证码',
+      htmlPrefix: `你的验证码是: `,
+    },
+    updateCaptchaKey = 'update_captcha_',
+  ) {
+    if (!address) {
       throw new BadRequestException('邮箱地址不能为空');
     }
     const code = Math.random().toString().slice(2, 8);
-    await this.redisService.set(`update_user_captcha_${address}`, code, 5 * 60);
+    await this.redisService.set(`${updateCaptchaKey}${address}`, code, 5 * 60);
     await this.emailService.sendMail({
       to: address,
       subject: emailConfig.subject || '更改用户信息验证码',
-      html: `<p>你的验证码是 ${code}</p>`
-    })
-    return '验证码发送成功'
+      html: `<p>${emailConfig.htmlPrefix} ${code}</p>`,
+    });
+    return '验证码发送成功';
   }
 }

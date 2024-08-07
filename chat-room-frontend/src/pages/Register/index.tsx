@@ -50,7 +50,7 @@ export function Register() {
         const res = await register(values);
 
         if (res.status === 201 || res.status === 200) {
-            message.success('注册成功', 1000, () => {
+            message.success('注册成功', 1, () => {
                 navigate('/login');
             });
 
