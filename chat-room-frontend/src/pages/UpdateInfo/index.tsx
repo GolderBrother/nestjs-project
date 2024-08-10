@@ -2,7 +2,7 @@ import { Button, Form, Input, message } from 'antd';
 import { useForm } from 'antd/es/form/Form';
 import { useCallback, useEffect } from 'react';
 import './index.css';
-import { useNavigate } from 'react-router-dom';
+import { HeadPicUpload } from './HeadPicUpload';
 import { getUserInfo, updateInfo, updateUserInfoCaptcha } from '../../api';
 
 export interface UserInfo {
@@ -20,13 +20,13 @@ const layout1 = {
 export function UpdateInfo() {
     const [form] = useForm();
 
-    
+
     async function queryUserInfo() {
         const res = await getUserInfo();
 
-        if(res.status === 201 || res.status === 200) {
+        if (res.status === 201 || res.status === 200) {
             console.log(res.data);
-            const { headPic,  nickName, email, username} = res.data;
+            const { headPic, nickName, email, username } = res.data;
             form.setFieldValue('headPic', headPic);
             form.setFieldValue('nickName', nickName);
             form.setFieldValue('email', email);
@@ -36,29 +36,37 @@ export function UpdateInfo() {
     const onFinish = async (values: UserInfo) => {
         try {
             const res = await updateInfo(values);
-            if(res.status === 201 || res.status === 200) {
+            if (res.status === 201 || res.status === 200) {
                 message.success('用户信息更新成功');
+                const userInfo = localStorage.getItem('userInfo');
+                if (userInfo) {
+                    const info = JSON.parse(userInfo);
+                    info.headPic = values.headPic;
+                    info.nickName = values.nickName;
+
+                    localStorage.setItem('userInfo', JSON.stringify(info));
+                }
                 queryUserInfo();
             }
-        } catch(e: any) {
+        } catch (e: any) {
             message.error(e.response?.data?.message || '系统繁忙，请稍后再试');
         }
     };
-    
+
     const sendCaptcha = async function () {
         try {
             const res = await updateUserInfoCaptcha();
-            if(res.status === 201 || res.status === 200) {
+            if (res.status === 201 || res.status === 200) {
                 message.success('发送成功');
-            } 
-        } catch(e: any) {
+            }
+        } catch (e: any) {
             message.error(e.response?.data?.message || '系统繁忙，请稍后再试');
         }
     };
     useEffect(() => {
         queryUserInfo();
     }, []);
-    
+
     return <div id="updateInfo-container">
         <Form
             form={form}
@@ -74,7 +82,7 @@ export function UpdateInfo() {
                     { required: true, message: '请输入头像!' },
                 ]}
             >
-                <Input/>
+                <HeadPicUpload />
             </Form.Item>
 
             <Form.Item
@@ -92,7 +100,7 @@ export function UpdateInfo() {
                 name="email"
                 rules={[
                     { required: true, message: '请输入邮箱!' },
-                    { type: "email", message: '请输入合法邮箱地址!'}
+                    { type: "email", message: '请输入合法邮箱地址!' }
                 ]}
             >
                 <Input />
@@ -118,5 +126,5 @@ export function UpdateInfo() {
                 </Button>
             </Form.Item>
         </Form>
-    </div>   
+    </div>
 }

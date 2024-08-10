@@ -86,3 +86,6 @@ export async function updateUserInfoCaptcha() {
     return await axiosInstance.post('/user/update/captcha');
 }
 
+export async function presignedUrl(fileName: string) {
+    return axiosInstance.get(`/minio/presignedUrl?name=${ fileName}`);
+}

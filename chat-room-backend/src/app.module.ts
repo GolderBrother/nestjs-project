@@ -10,24 +10,36 @@ import { APP_GUARD } from '@nestjs/core';
 import { AuthGuard } from './auth/auth.guard';
 import { FriendshipModule } from './friendship/friendship.module';
 import { ChatroomModule } from './chatroom/chatroom.module';
+import { MinioModule } from './minio/minio.module';
 
 @Module({
-  imports: [PrismaModule, UserModule, RedisModule, EmailModule, JwtModule.registerAsync({
-    global: true,
-    useFactory() {
-      return {
-        secret: 'james',
-        signOptions: {
-          expiresIn: '30m' // 默认 30 分钟
-        }
-      }
-    }
-  }), FriendshipModule, ChatroomModule],
+  imports: [
+    PrismaModule,
+    UserModule,
+    RedisModule,
+    EmailModule,
+    JwtModule.registerAsync({
+      global: true,
+      useFactory() {
+        return {
+          secret: 'james',
+          signOptions: {
+            expiresIn: '30m', // 默认 30 分钟
+          },
+        };
+      },
+    }),
+    FriendshipModule,
+    ChatroomModule,
+    MinioModule,
+  ],
   controllers: [AppController],
-  providers: [AppService, {
-    provide: APP_GUARD,
-    useClass: AuthGuard
-  }
+  providers: [
+    AppService,
+    {
+      provide: APP_GUARD,
+      useClass: AuthGuard,
+    },
   ],
 })
-export class AppModule { }
+export class AppModule {}
