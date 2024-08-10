@@ -1,4 +1,14 @@
-import { BadRequestException, Body, Controller, Delete, Get, Inject, Param, Post, Query } from '@nestjs/common';
+import {
+  BadRequestException,
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Inject,
+  Param,
+  Post,
+  Query,
+} from '@nestjs/common';
 import { FriendshipService } from './friendship.service';
 import { RequireLogin, UserInfo } from 'src/custom.decorator';
 import { FriendAddDto } from './dto/friend-add.dto';
@@ -6,10 +16,13 @@ import { FriendAddDto } from './dto/friend-add.dto';
 @Controller('friendship')
 @RequireLogin()
 export class FriendshipController {
-  constructor(private readonly friendshipService: FriendshipService) { }
+  constructor(private readonly friendshipService: FriendshipService) {}
 
   @Post('add')
-  async add(@Body() friendAddDto: FriendAddDto, @UserInfo('userId') userId: number) {
+  async add(
+    @Body() friendAddDto: FriendAddDto,
+    @UserInfo('userId') userId: number,
+  ) {
     return await this.friendshipService.add(friendAddDto, userId);
   }
 
@@ -20,28 +33,40 @@ export class FriendshipController {
   }
 
   @Get('agree/:id')
-  async agree(@Param('id') friendId: number, @UserInfo('userId') userId: number) {
+  async agree(
+    @Param('id') friendId: number,
+    @UserInfo('userId') userId: number,
+  ) {
     if (!friendId) {
-      throw new BadRequestException('添加的好友 id 不能为空')
+      throw new BadRequestException('添加的好友 id 不能为空');
     }
     return await this.friendshipService.agree(friendId, userId);
   }
 
   @Get('reject/:id')
-  async reject(@Param('id') friendId: number, @UserInfo('userId') userId: number) {
+  async reject(
+    @Param('id') friendId: number,
+    @UserInfo('userId') userId: number,
+  ) {
     if (!friendId) {
-      throw new BadRequestException('拒绝的好友 id 不能为空')
+      throw new BadRequestException('拒绝的好友 id 不能为空');
     }
     return await this.friendshipService.reject(friendId, userId);
   }
 
   @Get('list')
-  async friendship(@UserInfo('userId') userId: number, @Query('name') name: string) {
+  async getFriendship(
+    @UserInfo('userId') userId: number,
+    @Query('name') name: string,
+  ) {
     return this.friendshipService.getFriendship(userId, name);
   }
 
   @Delete('remove/:id')
-  async remove(@Param('id') friendId: number, @UserInfo('userId') userId: number) {
+  async remove(
+    @Param('id') friendId: number,
+    @UserInfo('userId') userId: number,
+  ) {
     return this.friendshipService.remove(friendId, userId);
   }
 }
