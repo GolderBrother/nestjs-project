@@ -4,7 +4,7 @@ import './index.css';
 import { ColumnsType } from "antd/es/table";
 import { useForm } from "antd/es/form/Form";
 import { friendshipList } from "@/api";
-
+import { AddFriendModal } from './AddFriendModal';
 interface SearchFriend {
     name: string;
 }
@@ -19,7 +19,13 @@ interface FriendshipSearchResult {
 
 export function Friendship() {
     const [friendshipResult, setFriendshipResult] = useState<Array<FriendshipSearchResult>>([]);
-
+    const [addFriendModalIsOpen, setAddFriendModalIsOpen] = useState<boolean>(false)
+    const openAddFriendModal= () => {
+        setAddFriendModalIsOpen(true)
+    }
+    const closeAddFriendModal= () => {
+        setAddFriendModalIsOpen(false)
+    }
     const columns: ColumnsType<FriendshipSearchResult> = useMemo(() => [
         {
             title: '昵称',
@@ -30,7 +36,7 @@ export function Friendship() {
             dataIndex: 'headPic',
             render: (_, record) => (
                 <div>
-                    <img src={record.headPic}/>
+                    <img src={record.headPic} />
                 </div>
             )
         },
@@ -49,10 +55,10 @@ export function Friendship() {
     ], []);
 
     const searchFriend = async (values: SearchFriend) => {
-        try{
+        try {
             const res = await friendshipList(values.name || '');
-    
-            if(res.status === 201 || res.status === 200) {
+
+            if (res.status === 201 || res.status === 200) {
                 setFriendshipResult(res.data.map((item: FriendshipSearchResult) => {
                     return {
                         ...item,
@@ -60,13 +66,13 @@ export function Friendship() {
                     }
                 }));
             }
-        } catch(e: any){
+        } catch (e: any) {
             message.error(e.response?.data?.message || '系统繁忙，请稍后再试');
         }
     };
-    
 
-    const [form ]  = useForm();
+
+    const [form] = useForm();
 
     useEffect(() => {
         searchFriend({
@@ -93,10 +99,17 @@ export function Friendship() {
                         搜索
                     </Button>
                 </Form.Item>
+                <Form.Item label=" ">
+                    <Button type="primary" style={{ background: 'green' }} onClick={openAddFriendModal}>
+                        添加好友
+                    </Button>
+                </Form.Item>
+
             </Form>
         </div>
         <div className="friendship-table">
-            <Table columns={columns} dataSource={friendshipResult} style={{width: '1000px'}}/>
+            <Table columns={columns} dataSource={friendshipResult} style={{ width: '1000px' }} />
         </div>
+        <AddFriendModal isOpen={addFriendModalIsOpen} handleClose={closeAddFriendModal} />
     </div>
 }

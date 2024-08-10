@@ -40,7 +40,7 @@ export class FriendshipController {
     if (!friendId) {
       throw new BadRequestException('添加的好友 id 不能为空');
     }
-    return await this.friendshipService.agree(friendId, userId);
+    return this.friendshipService.agree(friendId, userId);
   }
 
   @Get('reject/:id')
