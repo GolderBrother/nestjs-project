@@ -21,7 +21,7 @@ interface SendMessagePayload {
   sendUserId: number;
   chatroomId: number;
   message: {
-    type: 'text' | 'image';
+    type: 'text' | 'image' | 'file';
     content: string;
   };
 }
@@ -65,10 +65,15 @@ export class ChatGateway {
   async sendMessage(@MessageBody() payload: SendMessagePayload): Promise<void> {
     const { chatroomId, message, sendUserId } = payload;
     const roomName = chatroomId.toString();
+    const fileTypeMap = {
+      text: 0,
+      image: 1,
+      file: 2,
+    };
     // 聊天记录的保存，每个房间聊天的时候都会把聊天内容存到数据库里
     const history = await this.chatHistoryService.add(chatroomId, {
       content: message.content,
-      type: message.type === 'image' ? 1 : 0,
+      type: fileTypeMap[message.type],
       chatroomId: chatroomId,
       senderId: sendUserId,
     });

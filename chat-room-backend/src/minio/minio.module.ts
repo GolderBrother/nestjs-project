@@ -12,8 +12,8 @@ import * as Minio from 'minio';
           endPoint: 'localhost',
           port: 9000,
           useSSL: false,
-          accessKey: 'XwwdPoJNKsEoQ4FGTZlM',
-          secretKey: 'qLlUcKeAmi1D7ssa4KNwAQv0HoODAZPNkzEWntbB',
+          accessKey: 'PLkP64l0NNdswExjvUeE',
+          secretKey: 'qso5H1SsHGNEAdAO4BY8czVoV0Qo37WcmHVvOEh6',
         });
         return client;
       },

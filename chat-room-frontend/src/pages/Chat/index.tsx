@@ -1,18 +1,21 @@
-import { Button, Input, message } from "antd";
+import { Button, Popover, message } from "antd";
 import { useState, useRef, useEffect, useMemo } from "react";
 import { chatroomList as getChatroomListApi, chatHistoryList as chatHistoryListApi } from "@/api";
 import { io, Socket } from "socket.io-client";
 import './index.scss'
-import { ChatHistory, Chatroom, JoinRoomPayload, Message, Reply, SendMessagePayload } from "./types";
+import { ChatHistory, Chatroom, JoinRoomPayload, Reply, SendMessagePayload, MessageType } from "./types";
 import { getUserInfo } from "./utils";
 import TextArea from "antd/es/input/TextArea";
 import { useLocation } from "react-router-dom";
+import data from '@emoji-mart/data'
+import EmojiPicker from '@emoji-mart/react'
+import { UploadModal } from "./UploadModal";
+import { FileUploadType } from "./FileUpload";
 
 export function Chat() {
     const socketRef = useRef<Socket>();
     // const [messageList, setMessageList] = useState<Array<Message>>([]);
     const userInfo = useMemo(() => getUserInfo(), []);
-
     // 聊天室列表
     const [chatroomList, setChatroomList] = useState<Array<Chatroom>>([]);
     const [chatroomId, setChatroomId] = useState<number>(chatroomList?.length ? chatroomList[0].id : 0);
@@ -103,7 +106,7 @@ export function Chat() {
      * 发送消息到服务端。
      * @param value 
      */
-    function sendMessage(value: string) {
+    function sendMessage(value: string, type: MessageType = 'text') {
         if (!value) {
             return;
         }
@@ -116,7 +119,7 @@ export function Chat() {
             sendUserId: userId,
             chatroomId: chatroomId,
             message: {
-                type: 'text',
+                type,
                 content: value
             }
         }
@@ -146,6 +149,11 @@ export function Chat() {
         scrollToBottom(); // 等待渲染完成再滚动到底部
     }, [chatroomId])
 
+
+    const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
+
+    const [uploadType, setUploadType] = useState<FileUploadType>('image');
+
     return <div id="chat-container">
         {/* 聊天室列表 */}
         <div className="chat-room-list">
@@ -171,7 +179,15 @@ export function Chat() {
                         <span className="sender-nickname">{item.sender.nickName}</span>
                     </div>
                     <div className="message-content">
-                        {item.content}
+                        {/* 聊天记录类型 text:0、image:1、file:2 */}
+                        {
+                            item.type === 0
+                                ? item.content
+                                : item.type === 1
+                                    ? <img src={item.content} style={{ maxWidth: 200 }} />
+                                    : <div><a download href={item.content}>{item.content}</a>
+                                    </div>
+                        }
                     </div>
                 </div>
             })}
@@ -180,9 +196,21 @@ export function Chat() {
         {/* 发送消息 */}
         <div className="message-input">
             <div className="message-type">
-                <div className="message-type-item" key={1}>表情</div>
-                <div className="message-type-item" key={2}>图片</div>
-                <div className="message-type-item" key={3}>文件</div>
+                <div className="message-type-item" key={1}>
+                    <Popover content={<EmojiPicker data={data} onEmojiSelect={(emoji: any) => {
+                        setInputText((inputText) => inputText + emoji.native)
+                    }} />} title="Title" trigger="click">
+                        表情
+                    </Popover>
+                </div>
+                <div className="message-type-item" key={2} onClick={() => {
+                    setUploadType('image');
+                    setIsUploadModalOpen(true);
+                }}>图片</div>
+                <div className="message-type-item" key={3} onClick={() => {
+                    setUploadType('file');
+                    setIsUploadModalOpen(true);
+                }}>文件</div>
             </div>
             <div className="message-input-area">
                 <TextArea className="message-input-box" value={inputText} onChange={(e) => {
@@ -193,6 +221,12 @@ export function Chat() {
                     setInputText('');
                 }}>发送</Button>
             </div>
+            <UploadModal type={uploadType} isOpen={isUploadModalOpen} handleClose={(imgSrc) => {
+                setIsUploadModalOpen(false);
+                console.log(imgSrc);
+                if (imgSrc) sendMessage(imgSrc, uploadType)
+            }} />
+
         </div>
     </div>
 

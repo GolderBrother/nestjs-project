@@ -26,7 +26,7 @@ export interface User {
 }
 
 export interface Message {
-    type: 'text' | 'image'
+    type: MessageType
     content: string
 }
 
@@ -50,3 +50,5 @@ export type Reply = {
     userId: number
     message: undefined
 }
+
+export type MessageType = 'image' | 'text' | 'file';
