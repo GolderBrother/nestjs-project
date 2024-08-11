@@ -134,14 +134,15 @@ export class ChatroomService {
         chatroomId: true,
       },
     });
+    console.log('chatroomIds', chatroomIds);
     const chatrooms = await this.prismaService.chatroom.findMany({
       where: {
         id: {
           in: chatroomIds.map((item) => item.chatroomId),
         },
-        name: {
-          contains: name,
-        },
+        // name: {
+        //   contains: name,
+        // },
       },
       select: {
         id: true,
@@ -150,7 +151,7 @@ export class ChatroomService {
         createTime: true,
       },
     });
-
+    console.log('chatrooms11', chatrooms);
     const res = [];
     for (let i = 0; i < chatrooms.length; i++) {
       const userIds = await this.prismaService.userChatroom.findMany({

@@ -99,9 +99,10 @@ export async function friendAdd(data: AddFriend) {
     return axiosInstance.post('/friendship/add', data);
 }
 
-export async function chatroomList(name: string) {
-    return axiosInstance.get(`/chatroom/list?name=${name}`);
+export async function chatroomList(name?: string) {
+    return axiosInstance.get(`/chatroom/list?name=${name || ''}`);
 }
+
 
 export async function friendRequestList() {
     return axiosInstance.get('/friendship/request_list');
@@ -114,3 +115,8 @@ export async function agreeFriendRequest(id: number) {
 export async function rejectFriendRequest(id: number) {
     return axiosInstance.get(`/friendship/reject/${id}`);
 }
+
+export async function chatHistoryList(id: number) {
+    return axiosInstance.get(`/chat-history/list?chatroomId=${id}`);
+}
+

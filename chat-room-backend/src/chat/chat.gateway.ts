@@ -10,6 +10,7 @@ import { Server, Socket } from 'socket.io';
 import { WebSocketServer } from '@nestjs/websockets';
 import { Inject } from '@nestjs/common';
 import { ChatHistoryService } from 'src/chat-history/chat-history.service';
+import { UserService } from 'src/user/user.service';
 
 interface JoinRoomPayload {
   chatroomId: number;
@@ -36,6 +37,9 @@ export class ChatGateway {
   @Inject(ChatHistoryService)
   private chatHistoryService: ChatHistoryService;
 
+  @Inject(UserService)
+  private userService: UserService;
+
   /**
    * joinRoom 把 client socket 加入房间，房间号为直接用聊天室 id
    * @param client
@@ -58,22 +62,25 @@ export class ChatGateway {
    * @param payload
    */
   @SubscribeMessage('sendMessage')
-  sendMessage(@MessageBody() payload: SendMessagePayload): void {
+  async sendMessage(@MessageBody() payload: SendMessagePayload): Promise<void> {
     const { chatroomId, message, sendUserId } = payload;
     const roomName = chatroomId.toString();
     // 聊天记录的保存，每个房间聊天的时候都会把聊天内容存到数据库里
-    this.chatHistoryService.add(chatroomId, {
+    const history = await this.chatHistoryService.add(chatroomId, {
       content: message.content,
       type: message.type === 'image' ? 1 : 0,
       chatroomId: chatroomId,
       senderId: sendUserId,
     });
-
+    const sender = await this.userService.findUserDetailById(history.senderId);
     // message 的格式为 type、content，type 可以是 text、image，也就是可以发送文字、图片。
     this.server.to(roomName).emit('message', {
       type: 'sendMessage',
       userId: sendUserId,
-      message: message,
+      message: {
+        ...history,
+        sender,
+      },
     });
   }
 
