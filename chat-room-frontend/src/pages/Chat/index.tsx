@@ -66,7 +66,7 @@ export function Chat() {
             }
 
             socket.emit('joinRoom', payload);
-            // 监听服务端的 message。
+            // 监听服务端的 message 消息，有新消息的时候添加到聊天记录里，并通过 scrollIntoView 滚动到底部。
             socket.on('message', (reply: Reply) => {
                 // queryChatHistoryList(chatroomId)
                 // 这样，全程只需要查询一次聊天记录，性能好很多。
@@ -111,16 +111,18 @@ export function Chat() {
                 content: value
             }
         }
-
+        // 点击发送消息的时候，通过 socket 链接来 emit 消息
         socketRef.current?.emit('sendMessage', payload);
     }
 
+    // 点击聊天室的时候，在右侧展示查询出的聊天记录
     function toggleChatroom(chatroomId: number) {
         queryChatHistoryList(chatroomId);
         setChatroomId(chatroomId);
     }
 
     return <div id="chat-container">
+        {/* 聊天室列表 */}
         <div className="chat-room-list">
             {
                 chatroomList?.map(item => {
@@ -132,6 +134,7 @@ export function Chat() {
             }
         </div>
         {/* <img src="http://localhost:9001/api/v1/buckets/chat-room/objects/download?preview=true&prefix=james1.jpg&version_id=null" /> */}
+        {/* 聊天记录 */}
         {
             chatHistoryList.length ? <div className="message-list">
                 {chatHistoryList?.map(item => {
@@ -150,6 +153,7 @@ export function Chat() {
                 <div id="bottom-bar" key='bottom-bar'></div>
             </div> : null
         }
+        {/* 发送消息 */}
         <div className="message-input">
             <div className="message-type">
                 <div className="message-type-item" key={1}>表情</div>
