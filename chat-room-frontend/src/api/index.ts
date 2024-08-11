@@ -22,12 +22,12 @@ axiosInstance.interceptors.response.use(
     (response) => {
         const newToken = response.headers['token'];
         // 当响应的 header 带有 token，就更新本地 token。
-        if(newToken) {
+        if (newToken) {
             localStorage.setItem('token', newToken);
         }
         return response;
     }, async (error) => {
-        if(!error.response) {
+        if (!error.response) {
             return Promise.reject(error);
         }
         const { data } = error.response;
@@ -86,7 +86,7 @@ export async function updateUserInfoCaptcha() {
 }
 
 export async function presignedUrl(fileName: string) {
-    return axiosInstance.get(`/minio/presignedUrl?name=${ fileName}`);
+    return axiosInstance.get(`/minio/presignedUrl?name=${fileName}`);
 }
 
 export async function friendshipList(name?: string) {
@@ -144,3 +144,40 @@ export async function createOneToOne(friendId: number) {
     });
 }
 
+/**
+ * 查询群聊的查询成员
+ * @param chatroomId 
+ * @returns 
+ */
+
+export async function groupMembers(chatroomId: number) {
+    return axiosInstance.get(`/chatroom/members`, {
+        params: {
+            chatroomId
+        }
+    });
+}
+
+/**
+ * 聊天室添加人员
+ * @param chatroomId 
+ * @param joinUsername 
+ * @returns 
+ */
+export async function addMember(chatroomId: number, joinUsername: string) {
+    return axiosInstance.post(`/chatroom/join`, {
+        id: chatroomId,
+        joinUsername
+    });
+}
+
+/**
+ * 创建群聊
+ * @param name 
+ * @returns 
+ */
+export async function createGroup(name: string) {
+    return axiosInstance.post(`/chatroom/create-group`, {
+        name
+    });
+}

@@ -57,6 +57,16 @@ export function Chat() {
         }
     }
 
+    function scrollToBottom() {
+        setTimeout(() => {
+            const bottomBar = document.getElementById('bottom-bar');
+            // 等待渲染完成再滚动到底部
+            if (bottomBar) {
+                bottomBar.scrollIntoView({ block: 'end' });
+            }
+        }, 300);
+    }
+
     const initSocket = () => {
         const socket = socketRef.current = io('http://localhost:3005');
         socket.on('connect', () => {
@@ -75,9 +85,7 @@ export function Chat() {
                     // 直接在后面添加新的聊天信息
                     return chatHistory ? [...chatHistory, reply.message] : [reply.message]
                 });
-                setTimeout(() => {
-                    document.getElementById('bottom-bar')?.scrollIntoView({ block: 'end' });
-                }, 300); // 等待渲染完成再滚动到底部
+                scrollToBottom(); // 等待渲染完成再滚动到底部
             });
         })
         return () => {
@@ -127,12 +135,16 @@ export function Chat() {
     // 如果 state 里有 chatroomId，就选中对应的聊天室。
     useEffect(() => {
         const chatroomId = location.state?.chatroomId;
-        if (chatroomId) {
-            queryChatHistoryList(chatroomId);
+        console.log('chatroomId: ', chatroomId)
+        if (location.state?.chatroomId) {
+            queryChatHistoryList(location.state?.chatroomId);
+            setChatroomId(location.state?.chatroomId);
         }
-        setChatroomId(chatroomId);
     }, [location.state?.chatroomId]);
 
+    useEffect(() => {
+        scrollToBottom(); // 等待渲染完成再滚动到底部
+    }, [chatroomId])
 
     return <div id="chat-container">
         {/* 聊天室列表 */}
@@ -149,47 +161,39 @@ export function Chat() {
         </div>
         {/* <img src="http://localhost:9001/api/v1/buckets/chat-room/objects/download?preview=true&prefix=james1.jpg&version_id=null" /> */}
         {/* 聊天记录 */}
-
-        {
-            chatHistoryList.length ? (
-                <>
-
-                    <div className="message-list">
-                        {chatHistoryList?.map(item => {
-                            if (!item) return null;
-                            return <div className={`message-item ${item?.senderId === userInfo?.id ? 'from-me' : ''}`}
-                                data-id={item.id} key={item.id} >
-                                <div className="message-sender">
-                                    <img src={item.sender.headPic} />
-                                    <span className="sender-nickname">{item.sender.nickName}</span>
-                                </div>
-                                <div className="message-content">
-                                    {item.content}
-                                </div>
-                            </div>
-                        })}
-                        <div id="bottom-bar" key='bottom-bar'></div>
+        <div className="message-list">
+            {chatHistoryList?.map(item => {
+                if (!item) return null;
+                return <div className={`message-item ${item?.senderId === userInfo?.id ? 'from-me' : ''}`}
+                    data-id={item.id} key={item.id} >
+                    <div className="message-sender">
+                        <img src={item.sender.headPic} />
+                        <span className="sender-nickname">{item.sender.nickName}</span>
                     </div>
-                    {/* 发送消息 */}
-                    <div className="message-input">
-                        <div className="message-type">
-                            <div className="message-type-item" key={1}>表情</div>
-                            <div className="message-type-item" key={2}>图片</div>
-                            <div className="message-type-item" key={3}>文件</div>
-                        </div>
-                        <div className="message-input-area">
-                            <TextArea className="message-input-box" value={inputText} onChange={(e) => {
-                                setInputText(e.target.value)
-                            }} />
-                            <Button className="message-send-btn" type="primary" onClick={() => {
-                                sendMessage(inputText)
-                                setInputText('');
-                            }}>发送</Button>
-                        </div>
+                    <div className="message-content">
+                        {item.content}
                     </div>
-                </>
-            ) : null
-        }
+                </div>
+            })}
+            <div id="bottom-bar" key='bottom-bar'></div>
+        </div>
+        {/* 发送消息 */}
+        <div className="message-input">
+            <div className="message-type">
+                <div className="message-type-item" key={1}>表情</div>
+                <div className="message-type-item" key={2}>图片</div>
+                <div className="message-type-item" key={3}>文件</div>
+            </div>
+            <div className="message-input-area">
+                <TextArea className="message-input-box" value={inputText} onChange={(e) => {
+                    setInputText(e.target.value)
+                }} />
+                <Button className="message-send-btn" type="primary" onClick={() => {
+                    sendMessage(inputText)
+                    setInputText('');
+                }}>发送</Button>
+            </div>
+        </div>
     </div>
 
 }

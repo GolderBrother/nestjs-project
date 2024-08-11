@@ -68,12 +68,12 @@ export class ChatroomController {
 
   @Post('join')
   async join(@Body() joinChatRoomDto: JoinChatRoomDto) {
-    const { id, joinUserId } = joinChatRoomDto;
+    const { id, joinUsername } = joinChatRoomDto;
     if (!id) {
       throw new BadRequestException('id 不能为空');
     }
-    if (!joinUserId) {
-      throw new BadRequestException('joinUserId 不能为空');
+    if (!joinUsername) {
+      throw new BadRequestException('joinUsername 不能为空');
     }
     return await this.chatroomService.join(joinChatRoomDto);
   }

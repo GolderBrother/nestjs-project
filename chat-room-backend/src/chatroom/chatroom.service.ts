@@ -151,7 +151,6 @@ export class ChatroomService {
         createTime: true,
       },
     });
-    console.log('chatrooms11', chatrooms);
     const res = [];
     for (let i = 0; i < chatrooms.length; i++) {
       const userIds = await this.prismaService.userChatroom.findMany({
@@ -243,7 +242,7 @@ export class ChatroomService {
    * @param joinChatRoomDto
    */
   async join(joinChatRoomDto: JoinChatRoomDto) {
-    const { id, joinUserId } = joinChatRoomDto;
+    const { id, joinUsername } = joinChatRoomDto;
 
     const chatroom = await this.prismaService.chatroom.findUnique({
       where: {
@@ -255,6 +254,12 @@ export class ChatroomService {
       throw new BadRequestException('一对一聊天室不能加人');
     }
 
+    const user = await this.prismaService.user.findUnique({
+      where: {
+        username: joinUsername,
+      },
+    });
+    const joinUserId = user?.id;
     // 加入群聊
     await this.prismaService.userChatroom.create({
       data: {
@@ -263,7 +268,7 @@ export class ChatroomService {
       },
     });
 
-    return '加入成功';
+    return chatroom.id;
   }
 
   /**
