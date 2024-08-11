@@ -10,7 +10,6 @@
     width: 150px;
     border: 1px solid #000;
     overflow-y: auto;
-    border-right: none;
   }
 
   .chat-room-item {
@@ -32,6 +31,7 @@
     overflow-y: auto;
     height: calc(100% - 100px);
     border-bottom: none;
+    border-left: none;
 
 
     .message-item {

@@ -45,7 +45,7 @@ export class ChatroomService {
           chatroomId,
         },
       });
-      return '创建成功';
+      return chatroomId;
     }
   }
   /**
@@ -166,6 +166,7 @@ export class ChatroomService {
         const id = userIds.filter((item) => item.userId !== userId)?.[0]
           ?.userId;
         if (id) {
+          // 如果是一对一聊天室，就查询下对方用户的信息，用他的名字替换聊天室名字。
           const user = await this.prismaService.user.findUnique({
             where: {
               id,
@@ -291,5 +292,48 @@ export class ChatroomService {
     });
 
     return '退出成功';
+  }
+
+  /**
+   * 查询单聊的聊天室
+   * 两个 user 都在的 1-1 聊天室
+   */
+  async queryOneToOneChatroom(userId1: number, userId2: number) {
+    // 先查询 userId1 的所有 chatrooms，再查询 userId2 的所有 chatrooms2。
+    const chatrooms = await this.prismaService.userChatroom.findMany({
+      where: {
+        userId: userId1,
+      },
+    });
+    const chatrooms2 = await this.prismaService.userChatroom.findMany({
+      where: {
+        userId: userId2,
+      },
+    });
+
+    let res;
+    // 然后再查询 chatrooms 和 chatroom2 的交集，返回第一个 chatroomId
+    for (let i = 0; i < chatrooms.length; i++) {
+      const chatroom = await this.prismaService.chatroom.findFirst({
+        where: {
+          id: chatrooms[i].chatroomId,
+        },
+      });
+      if (!chatroom) continue;
+      // 过滤掉类型为群聊的聊天室。
+      if (chatroom.type === true) {
+        continue;
+      }
+
+      const found = chatrooms2.find(
+        (item2) => item2.chatroomId === chatroom.id,
+      );
+      if (found) {
+        res = found.chatroomId;
+        break;
+      }
+    }
+
+    return res;
   }
 }

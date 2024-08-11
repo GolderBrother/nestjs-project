@@ -6,15 +6,16 @@ import './index.scss'
 import { ChatHistory, Chatroom, JoinRoomPayload, Message, Reply, SendMessagePayload } from "./types";
 import { getUserInfo } from "./utils";
 import TextArea from "antd/es/input/TextArea";
+import { useLocation } from "react-router-dom";
 
 export function Chat() {
     const socketRef = useRef<Socket>();
-    const [chatroomId, setChatroomId] = useState<number>();
-    const [messageList, setMessageList] = useState<Array<Message>>([]);
+    // const [messageList, setMessageList] = useState<Array<Message>>([]);
     const userInfo = useMemo(() => getUserInfo(), []);
 
     // 聊天室列表
     const [chatroomList, setChatroomList] = useState<Array<Chatroom>>([]);
+    const [chatroomId, setChatroomId] = useState<number>(chatroomList?.length ? chatroomList[0].id : 0);
     async function queryChatroomList() {
         try {
             const userInfo = getUserInfo()
@@ -73,9 +74,9 @@ export function Chat() {
                 setChatHistoryList((chatHistory) => {
                     // 直接在后面添加新的聊天信息
                     return chatHistory ? [...chatHistory, reply.message] : [reply.message]
-                });   
+                });
                 setTimeout(() => {
-                    document.getElementById('bottom-bar')?.scrollIntoView({block: 'end'});
+                    document.getElementById('bottom-bar')?.scrollIntoView({ block: 'end' });
                 }, 300); // 等待渲染完成再滚动到底部
             });
         })
@@ -87,7 +88,7 @@ export function Chat() {
         initSocket();
         // chatroomId改变了需要重新连接socket
     }, [chatroomId]);
-    
+
 
     const [inputText, setInputText] = useState('');
     /**
@@ -121,55 +122,74 @@ export function Chat() {
         setChatroomId(chatroomId);
     }
 
+    const location = useLocation();
+
+    // 如果 state 里有 chatroomId，就选中对应的聊天室。
+    useEffect(() => {
+        const chatroomId = location.state?.chatroomId;
+        if (chatroomId) {
+            queryChatHistoryList(chatroomId);
+        }
+        setChatroomId(chatroomId);
+    }, [location.state?.chatroomId]);
+
+
     return <div id="chat-container">
         {/* 聊天室列表 */}
         <div className="chat-room-list">
             {
                 chatroomList?.map(item => {
                     if (!item) return null;
-                    return <div className="chat-room-item" data-id={item.id} key={item.id} onClick={() => {
-                        toggleChatroom(item.id);
-                    }}>{item.name}</div>
+                    return <div className={`chat-room-item ${item.id === chatroomId ? 'selected' : ''}`}
+                        data-id={item.id} key={item.id} onClick={() => {
+                            toggleChatroom(item.id);
+                        }}>{item.name}</div>
                 })
             }
         </div>
         {/* <img src="http://localhost:9001/api/v1/buckets/chat-room/objects/download?preview=true&prefix=james1.jpg&version_id=null" /> */}
         {/* 聊天记录 */}
+
         {
-            chatHistoryList.length ? <div className="message-list">
-                {chatHistoryList?.map(item => {
-                    if (!item) return null;
-                    return <div className={`message-item ${item?.senderId === userInfo?.id ? 'from-me' : ''}`}
-                        data-id={item.id} key={item.id} >
-                        <div className="message-sender">
-                            <img src={item.sender.headPic} />
-                            <span className="sender-nickname">{item.sender.nickName}</span>
+            chatHistoryList.length ? (
+                <>
+
+                    <div className="message-list">
+                        {chatHistoryList?.map(item => {
+                            if (!item) return null;
+                            return <div className={`message-item ${item?.senderId === userInfo?.id ? 'from-me' : ''}`}
+                                data-id={item.id} key={item.id} >
+                                <div className="message-sender">
+                                    <img src={item.sender.headPic} />
+                                    <span className="sender-nickname">{item.sender.nickName}</span>
+                                </div>
+                                <div className="message-content">
+                                    {item.content}
+                                </div>
+                            </div>
+                        })}
+                        <div id="bottom-bar" key='bottom-bar'></div>
+                    </div>
+                    {/* 发送消息 */}
+                    <div className="message-input">
+                        <div className="message-type">
+                            <div className="message-type-item" key={1}>表情</div>
+                            <div className="message-type-item" key={2}>图片</div>
+                            <div className="message-type-item" key={3}>文件</div>
                         </div>
-                        <div className="message-content">
-                            {item.content}
+                        <div className="message-input-area">
+                            <TextArea className="message-input-box" value={inputText} onChange={(e) => {
+                                setInputText(e.target.value)
+                            }} />
+                            <Button className="message-send-btn" type="primary" onClick={() => {
+                                sendMessage(inputText)
+                                setInputText('');
+                            }}>发送</Button>
                         </div>
                     </div>
-                })}
-                <div id="bottom-bar" key='bottom-bar'></div>
-            </div> : null
+                </>
+            ) : null
         }
-        {/* 发送消息 */}
-        <div className="message-input">
-            <div className="message-type">
-                <div className="message-type-item" key={1}>表情</div>
-                <div className="message-type-item" key={2}>图片</div>
-                <div className="message-type-item" key={3}>文件</div>
-            </div>
-            <div className="message-input-area">
-                <TextArea className="message-input-box" value={inputText} onChange={(e) => {
-                    setInputText(e.target.value)
-                }} />
-                <Button className="message-send-btn" type="primary" onClick={() => {
-                    sendMessage(inputText)
-                    setInputText('');
-                }}>发送</Button>
-            </div>
-        </div>
     </div>
 
 }

@@ -65,9 +65,7 @@ export async function register(registerUser: RegisterUser) {
 
 export async function updatePasswordCaptcha(email: string) {
     return await axiosInstance.post('/user/update_password/captcha', {
-        params: {
-            address: email
-        }
+        address: email
     });
 }
 
@@ -118,5 +116,31 @@ export async function rejectFriendRequest(id: number) {
 
 export async function chatHistoryList(id: number) {
     return axiosInstance.get(`/chat-history/list?chatroomId=${id}`);
+}
+
+/**
+ * 查找聊天室
+ * @param userId1 
+ * @param userId2 
+ * @returns 
+ */
+export async function findChatroom(userId1: number, userId2: number) {
+    return axiosInstance.get(`/chatroom/findChatroom`, {
+        params: {
+            userId1,
+            userId2
+        }
+    });
+}
+
+/**
+ * 创建一对一聊天室
+ * @param friendId 
+ * @returns 
+ */
+export async function createOneToOne(friendId: number) {
+    return axiosInstance.post(`/chatroom/create-one-to-one`, {
+        friendId
+    });
 }
 
