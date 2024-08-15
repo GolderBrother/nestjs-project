@@ -85,3 +85,13 @@ model ChatHistory {
   createTime DateTime @default(now())
   updateTime DateTime @updatedAt
 }
+
+// 收藏列表
+model Favorite {
+  id Int @id @default(autoincrement())
+  // 关联 user 和 chatHistory
+  chatHistoryId Int
+  userId Int
+  createTime DateTime @default(now())
+  updateTime DateTime @updatedAt
+}

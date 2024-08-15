@@ -11,6 +11,7 @@ import data from '@emoji-mart/data'
 import EmojiPicker from '@emoji-mart/react'
 import { UploadModal } from "./UploadModal";
 import { FileUploadType } from "./FileUpload";
+import { favoriteAdd } from "@/api";
 
 export function Chat() {
     const socketRef = useRef<Socket>();
@@ -154,6 +155,20 @@ export function Chat() {
 
     const [uploadType, setUploadType] = useState<FileUploadType>('image');
 
+
+    async function addToFavorite(chatHistoryId: number) {
+        try {
+            const res = await favoriteAdd(chatHistoryId);
+
+            if (res.status === 201 || res.status === 200) {
+                message.success('收藏成功')
+            }
+        } catch (e: any) {
+            message.error(e.response?.data?.message || '系统繁忙，请稍后再试');
+        }
+    }
+
+
     return <div id="chat-container">
         {/* 聊天室列表 */}
         <div className="chat-room-list">
@@ -163,7 +178,8 @@ export function Chat() {
                     return <div className={`chat-room-item ${item.id === chatroomId ? 'selected' : ''}`}
                         data-id={item.id} key={item.id} onClick={() => {
                             toggleChatroom(item.id);
-                        }}>{item.name}</div>
+                        }}
+                    >{item.name}</div>
                 })
             }
         </div>
@@ -173,7 +189,11 @@ export function Chat() {
             {chatHistoryList?.map(item => {
                 if (!item) return null;
                 return <div className={`message-item ${item?.senderId === userInfo?.id ? 'from-me' : ''}`}
-                    data-id={item.id} key={item.id} >
+                    data-id={item.id} key={item.id}
+                    onDoubleClick={() => {
+                        addToFavorite(item.id)
+                    }}
+                >
                     <div className="message-sender">
                         <img src={item.sender.headPic} />
                         <span className="sender-nickname">{item.sender.nickName}</span>

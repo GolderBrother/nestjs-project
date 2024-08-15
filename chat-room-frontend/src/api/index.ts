@@ -181,3 +181,21 @@ export async function createGroup(name: string) {
         name
     });
 }
+
+
+export async function getFavoriteList() {
+    return axiosInstance.get(`/favorite/list`);
+}
+
+export async function favoriteAdd(chatHistoryId: number) {
+    return axiosInstance.post(`/favorite/add`, {
+        chatHistoryId
+    });
+}
+
+export async function favoriteDel(id: number) {
+    return axiosInstance.post(`/favorite/del`, {
+        id
+    });
+}
+
