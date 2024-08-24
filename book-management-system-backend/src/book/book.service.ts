@@ -67,8 +67,17 @@ export class BookService {
     const books: Book[] = await this.dbService.read();
     return books.find((book) => book.id === id);
   }
-  async list() {
+  async list(name: string) {
     const books: Book[] = await this.dbService.read();
-    return books;
+    console.log('list name', name);
+    console.log('list books', books);
+    return name
+      ? books.filter(
+          (book) =>
+            book.name.includes(name) ||
+            book.author.includes(name) ||
+            book.description.includes(name),
+        )
+      : books;
   }
 }

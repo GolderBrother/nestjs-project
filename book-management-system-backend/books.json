@@ -1,1 +1,16 @@
-[{"id":375378,"author":"施耐庵","cover":"https://example.com/covers/shuihuzhuan.jpg","description":"《水浒传》描写了北宋末年一百零八位好汉在梁山泊聚义，反抗朝廷的故事。","name":"水浒传"},{"id":490370,"author":"罗贯中","cover":"https://example.com/covers/sanguoyanyi.jpg","description":"《三国演义》是中国古代历史小说，描写了东汉末年到三国时期的历史风云和英雄人物。","name":"三国演义"}]
+[
+    {
+        "id": 375378,
+        "author": "施耐庵",
+        "cover": "uploads/1723979316838-606504784-cat1.jpg",
+        "description": "《水浒传》描写了北宋末年一百零八位好汉在梁山泊聚义，反抗朝廷的故事。",
+        "name": "水浒传"
+    },
+    {
+        "id": 490370,
+        "author": "罗贯中",
+        "cover": "uploads/1723979316838-606504784-cat1.jpg",
+        "description": "《三国演义》是中国古代历史小说，描写了东汉末年到三国时期的历史风云和英雄人物。",
+        "name": "三国演义"
+    }
+]
