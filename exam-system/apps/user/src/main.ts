@@ -12,7 +12,11 @@ async function bootstrap() {
       port: 8888,
     },
   });
-  app.useGlobalPipes(new ValidationPipe());
+  app.useGlobalPipes(
+    new ValidationPipe({
+      transform: true,
+    }),
+  );
   app.enableCors();
   await app.listen(3001);
 }
