@@ -1,6 +1,7 @@
 import { NestFactory } from '@nestjs/core';
 import { ExamModule } from './exam.module';
 import { Transport } from '@nestjs/microservices';
+import { ValidationPipe } from '@nestjs/common';
 
 async function bootstrap() {
   const app = await NestFactory.create(ExamModule);
@@ -12,6 +13,13 @@ async function bootstrap() {
       port: 8888,
     },
   });
+
+  // 全局校验管道
+  app.useGlobalPipes(
+    new ValidationPipe({
+      transform: true,
+    }),
+  );
 
   // 暴露了3002端口的 http 服务
   await app.listen(3002);
