@@ -3,6 +3,7 @@ import { Login } from "../pages/Login";
 import { Register } from "../pages/Register";
 import { UpdatePassword } from "../pages/UpdatePassword";
 import { ExamList } from "../pages/ExamList";
+import { Edit } from "../pages/Edit";
 
 export function Aaa() {
     return <div>aaa</div>;
@@ -38,5 +39,9 @@ export const ROUTES = [
     {
       path: "update_password",
       element: <UpdatePassword />,
+    },
+    {
+      path: "edit/:id",
+      element: <Edit />
     }
   ];
