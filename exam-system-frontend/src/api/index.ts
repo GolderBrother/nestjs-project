@@ -1,5 +1,5 @@
 import axios, { AxiosResponse, InternalAxiosRequestConfig } from "axios";
-import { ExamAdd, RegisterUser, UpdatePassword } from "./types";
+import { ExamAdd, ExamSaveParams, RegisterUser, UpdatePassword } from "./types";
 import { message } from "antd";
 
 const userServiceInstance = axios.create({
@@ -102,4 +102,12 @@ export async function examUnPublish(id: number) {
 
 export async function examDelete(id: number) {
     return await examServiceInstance.delete('/exam/delete/' + id );
+}
+
+export async function examFind(id: number) {
+    return await examServiceInstance.get('/exam/find/' + id );
+}
+
+export async function examSave(data: ExamSaveParams) {
+    return await examServiceInstance.post('/exam/save', data);
 }

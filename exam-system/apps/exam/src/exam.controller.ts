@@ -67,4 +67,9 @@ export class ExamController {
   async unpublish(@UserInfo('userId') userId: number, @Body('id') id: number) {
     return await this.examService.unpublish(userId, Number(id));
   }
+
+  @Get('find/:id')
+  async find(@Param('id') id: string) {
+    return await this.examService.find(Number(id));
+  }
 }
