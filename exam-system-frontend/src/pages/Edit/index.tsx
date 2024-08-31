@@ -45,6 +45,7 @@ export function Edit() {
       isOver: monitor.isOver(),
     }),
   }));
+  const [curQuestionId, setCurQuestionId] = useState<number>();
   function renderComponents(arr: Array<Question>) {
     return arr.map((item) => {
       let formComponent;
@@ -79,7 +80,6 @@ export function Edit() {
       );
     });
   }
-  const [curQuestionId, setCurQuestionId] = useState<number>();
 
   const [form] = useForm();
 
