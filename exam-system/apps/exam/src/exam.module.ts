@@ -5,7 +5,6 @@ import { RedisModule } from '@app/redis';
 import { APP_GUARD } from '@nestjs/core';
 import { AuthGuard, CommonModule } from '@app/common';
 import { PrismaModule } from '@app/prisma';
-
 @Module({
   imports: [RedisModule, PrismaModule, CommonModule],
   controllers: [ExamController],

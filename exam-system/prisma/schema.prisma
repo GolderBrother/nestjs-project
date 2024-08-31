@@ -21,6 +21,7 @@ model User {
   createTime DateTime @default(now())
   updateTime DateTime @updatedAt
   exams      Exam[]
+  answers   Answer[]
 }
 
 model Exam {
@@ -34,4 +35,24 @@ model Exam {
 
   createUserId Int
   createUser   User @relation(fields: [createUserId], references: [id])
+
+
+  answers   Answer[]
+}
+
+// 答卷
+model Answer {
+  id  Int @id @default(autoincrement())
+  content String @db.Text 
+  score Int
+  createTime DateTime @default(now())
+  updateTime DateTime @updatedAt
+
+  answererId Int
+  // 外键关联用户表的答题人(用户ID)
+  answerer     User  @relation(fields: [answererId], references: [id])
+
+  examId Int
+  // 外键关联考卷表的考卷ID
+  exam     Exam  @relation(fields: [examId], references: [id])
 }

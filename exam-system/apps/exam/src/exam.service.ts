@@ -2,11 +2,15 @@ import { Inject, Injectable } from '@nestjs/common';
 import { ExamAddDto } from './dto/exam-add.dto';
 import { PrismaService } from '@app/prisma';
 import { ExamSaveDto } from './dto/exam-save.dto';
+import { ExcelService } from '@app/excel';
 
 @Injectable()
 export class ExamService {
   @Inject(PrismaService)
   private prismaService: PrismaService;
+
+  @Inject(ExcelService)
+  private excelService: ExcelService;
 
   getHello(): string {
     return 'Hello World!';
