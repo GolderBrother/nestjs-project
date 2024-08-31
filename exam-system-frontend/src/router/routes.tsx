@@ -2,6 +2,7 @@ import { Link, Outlet } from "react-router-dom";
 import { Login } from "../pages/Login";
 import { Register } from "../pages/Register";
 import { UpdatePassword } from "../pages/UpdatePassword";
+import { ExamList } from "../pages/ExamList";
 
 export function Aaa() {
     return <div>aaa</div>;
@@ -24,7 +25,7 @@ export function Layout() {
 export const ROUTES = [
     {
       path: "/",
-      element: <div>index</div>,
+      element: <ExamList />
     },
     {
       path: "login",

@@ -20,31 +20,31 @@ export function Register() {
     const navigate = useNavigate();
     async function sendCaptcha() {
         const address = form.getFieldValue('email');
-        if(!address) {
+        if (!address) {
             return message.error('请输入邮箱地址');
         }
-    
+
         try {
             const res = await registerCaptchaApi(address);
-            if(res.status === 201 || res.status === 200) {
+            if (res.status === 201 || res.status === 200) {
                 message.success('发送成功');
             }
-        } catch(e: unknown) {
+        } catch (e: unknown) {
             message.error(e.response?.data?.message || '系统繁忙，请稍后再试');
         }
     }
     const onFinish = async (values: RegisterUser) => {
-        if(values.password !== values.confirmPassword) {
+        if (values.password !== values.confirmPassword) {
             return message.error('两次密码不一致');
         }
         const res = await registerApi(values);
-    
-        if(res.status === 201 || res.status === 200) {
+
+        if (res.status === 201 || res.status === 200) {
             message.success('注册成功');
             setTimeout(() => {
                 navigate('/login')
             }, 1000);
-    
+
         } else {
             message.error(res.data.data || '系统繁忙，请稍后再试');
         }
@@ -88,7 +88,7 @@ export function Register() {
                 name="email"
                 rules={[
                     { required: true, message: '请输入邮箱!' },
-                    { type: "email", message: '请输入合法邮箱地址!'}
+                    { type: "email", message: '请输入合法邮箱地址!' }
                 ]}
             >
                 <Input />
@@ -122,5 +122,5 @@ export function Register() {
                 </Button>
             </Form.Item>
         </Form>
-    </div>   
+    </div>
 }

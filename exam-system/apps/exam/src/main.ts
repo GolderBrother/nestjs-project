@@ -21,6 +21,9 @@ async function bootstrap() {
     }),
   );
 
+  // 开启跨域
+  app.enableCors();
+
   // 暴露了3002端口的 http 服务
   await app.listen(3002);
 }
