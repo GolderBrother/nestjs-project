@@ -1,5 +1,5 @@
 import axios, { AxiosResponse, InternalAxiosRequestConfig } from "axios";
-import { RegisterUser, UpdatePassword } from "./types";
+import { ExamAdd, RegisterUser, UpdatePassword } from "./types";
 import { message } from "antd";
 
 const userServiceInstance = axios.create({
@@ -82,4 +82,24 @@ export async function updatePassword(data: UpdatePassword) {
 
 export async function getExamList() {
     return await examServiceInstance.get('/exam/list');
+}
+
+export async function examAdd(values: ExamAdd) {
+    return await examServiceInstance.post('/exam/add', values);
+}
+
+export async function examPublish(id: number) {
+    return await examServiceInstance.post('/exam/publish/', {
+        id
+    });
+}
+
+export async function examUnPublish(id: number) {
+    return await examServiceInstance.post('/exam/unpublish/', {
+        id
+    });
+}
+
+export async function examDelete(id: number) {
+    return await examServiceInstance.delete('/exam/delete/' + id );
 }

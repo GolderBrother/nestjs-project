@@ -58,7 +58,13 @@ export class ExamController {
   }
 
   @Post('publish')
-  async publish(@UserInfo('userId') userId: number, @Body('id') id: string) {
+  async publish(@UserInfo('userId') userId: number, @Body('id') id: number) {
     return await this.examService.publish(userId, Number(id));
+  }
+
+  @Post('unpublish')
+  @RequireLogin()
+  async unpublish(@UserInfo('userId') userId: number, @Body('id') id: number) {
+    return await this.examService.unpublish(userId, Number(id));
   }
 }

@@ -26,3 +26,7 @@ export interface Exam {
     isDelete: boolean
     content: string
 }
+
+export interface ExamAdd {
+    name: string;
+}
