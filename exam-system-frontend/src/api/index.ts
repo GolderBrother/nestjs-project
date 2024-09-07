@@ -120,3 +120,12 @@ export async function examFind(id: number) {
 export async function examSave(data: ExamSaveParams) {
     return await examServiceInstance.post('/exam/save', data);
 }
+
+/**
+ * 查找答卷
+ * @param id 
+ * @returns 
+ */
+export async function answerFind(id: number) {
+    return await answerServiceInstance.get('/answer/find/' + id);
+}

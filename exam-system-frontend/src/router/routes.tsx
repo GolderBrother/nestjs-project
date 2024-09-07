@@ -5,6 +5,7 @@ import { UpdatePassword } from "../pages/UpdatePassword";
 import { ExamList } from "../pages/ExamList";
 import { Edit } from "../pages/Edit";
 import { Exam } from "../pages/Exam";
+import { Res } from "../pages/Res";
 
 export function Aaa() {
   return <div>aaa</div>;
@@ -54,5 +55,9 @@ export const ROUTES = [
   {
     path: "exam/:id",
     element: <Exam />,
+  },
+  {
+    path: "res/:id",
+    element: <Res />,
   },
 ];
