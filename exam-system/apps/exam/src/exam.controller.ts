@@ -15,7 +15,7 @@ import { RequireLogin, UserInfo } from 'apps/user/src/custom.decorator';
 import { ExamAddDto } from './dto/exam-add.dto';
 import { ExamSaveDto } from './dto/exam-save.dto';
 
-@Controller()
+@Controller('exam')
 export class ExamController {
   constructor(private readonly examService: ExamService) {}
 

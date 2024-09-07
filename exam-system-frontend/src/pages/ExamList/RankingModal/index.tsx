@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { getRanking } from "../../../api";
 import { message, Modal, Table, TableColumnsType } from "antd";
 
@@ -11,6 +11,7 @@ interface RankingModalProps {
 export function RankingModal(props: RankingModalProps) {
     const [list, setList] = useState([])
     const queryRankList = async () => {
+        console.log('queryRankList props.examId', props.examId)
         if (!props.examId) return;
 
         try {
@@ -55,6 +56,5 @@ export function RankingModal(props: RankingModalProps) {
     >
 
         <Table dataSource={list} columns={columns} />;
-
     </Modal>
 }

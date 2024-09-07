@@ -14,7 +14,8 @@ export function ExamList() {
             const res = await getExamListApi();
             if (res.status === 201 || res.status === 200) {
                 // 过滤出未删除的
-                setExamList(Array.isArray(res.data) ? res.data.filter(item => !item.isDelete) : [])
+                // setExamList(Array.isArray(res.data) ? res.data.filter(item => !item.isDelete) : [])
+                setExamList(Array.isArray(res.data) ? res.data : [])
             }
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
         } catch (e: any) {
@@ -62,6 +63,7 @@ export function ExamList() {
     const [bin, setBin] = useState(false)
     const showExamList = useMemo(() => {
         const examListData = Array.isArray(examList) ? examList : [];
+        console.log('bin', bin)
         return examListData.filter(item => bin ? item.isDelete === true : item.isDelete === false)
     }, [bin, examList])
 
@@ -80,12 +82,15 @@ export function ExamList() {
             <div className="operate">
                 <Button type="primary" onClick={openExamAddMode}>新建试卷</Button>
                 {/* 回收站就是根据 isDelete 来过滤列表里的数据 */}
-                <Radio.Button type="primary" value={bin} onChange={() => setBin(!bin)}>回收站</Radio.Button>
+                <Button onClick={() => {
+                    setBin(bin => !bin)
+                }}>{bin ? '退出回收站' : '打开回收站'}</Button>
+
             </div>
             <div className="list">
                 {
                     showExamList?.map(item => {
-                        return <div className="item">
+                        return <div className="item" key={item.id}>
                             <p>{item.name}</p>
                             <div className="btns">
                                 <Button className="btn" type="primary" style={{ background: 'darkblue' }} onClick={() => changePublishState(item.id, item.isPublish)}>{item.isPublish ? '停止' : '发布'}</Button>

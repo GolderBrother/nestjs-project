@@ -14,7 +14,7 @@ import { firstValueFrom } from 'rxjs';
 import { RequireLogin, UserInfo } from 'apps/user/src/custom.decorator';
 import { AnswerAddDto } from './dto/answer-add.dto';
 
-@Controller()
+@Controller('answer')
 export class AnswerController {
   constructor(private readonly answerService: AnswerService) {}
 

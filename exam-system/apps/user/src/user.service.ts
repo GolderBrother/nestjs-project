@@ -69,7 +69,7 @@ export class UserService {
       throw new HttpException('用户不存在', HttpStatus.BAD_REQUEST);
     }
     // 密码错误
-    if (foundUser.password !== loginUser.username) {
+    if (foundUser.password !== loginUser.password) {
       throw new HttpException('密码错误', HttpStatus.BAD_REQUEST);
     }
     delete foundUser.password;

@@ -1,13 +1,25 @@
 import { Button, Checkbox, Input, message, Radio } from "antd";
 import { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
-import { examFind } from "../../api";
+import { useNavigate, useParams } from "react-router-dom";
+import { answerAdd, examFind } from "../../api";
 import { Question } from "../Edit/type";
-
+import './index.scss'
+export interface AnswerItem {
+    id: number; answer: string
+}
 export function Exam() {
 
     const { id } = useParams();
+    const navigate = useNavigate();
+    const [answers, setAnswers] = useState<Array<AnswerItem>>([])
     const [componentJson, setComponentJson] = useState<Array<Question>>([])
+    function setAnswer(id: number, answer: string) {
+        setAnswers(answers.map(item => item.id === id ? ({
+            id,
+            answer
+        }) : item))
+
+    }
     async function getExamDetail() {
         if (!id) {
             return;
@@ -16,8 +28,15 @@ export function Exam() {
             const res = await examFind(+id);
             if (res.status === 201 || res.status === 200) {
                 try {
-                    setComponentJson(JSON.parse(res.data.content))
-                } catch (e) { }
+                    const content = JSON.parse(res.data.content);
+                    const _answers = content.map(item => ({
+                        id: item.id,
+                    }))
+                    setAnswers(_answers)
+                    setComponentJson(content)
+                } catch (e) {
+                    console.error('e', e)
+                }
             }
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
         } catch (e: any) {
@@ -33,16 +52,16 @@ export function Exam() {
             let formComponent;
             if (item.type === "radio") {
                 formComponent = (
-                    <Radio.Group>
+                    <Radio.Group onChange={e => setAnswer(item.id, e.target.value)}>
                         {item.options?.map((option) => (
                             <Radio value={option}>{option}</Radio>
                         ))}
                     </Radio.Group>
                 );
             } else if (item.type === "checkbox") {
-                formComponent = <Checkbox.Group options={item.options} />;
+                formComponent = <Checkbox.Group options={item.options} onChange={values => setAnswer(item.id, values.join(','))} />;
             } else if (item.type === "input") {
-                formComponent = <Input />;
+                formComponent = <Input onChange={e => setAnswer(item.id, e.target.value)} />;
             }
             return <div className="component-item" key={item.id}>
                 <p className="question">{item.question}</p>
@@ -52,10 +71,29 @@ export function Exam() {
             </div>
         });
     }
+    const addAnswer = async () => {
+        if (!id) return;
+        try {
+            const res = await answerAdd({
+                examId: Number(id),
+                content: JSON.stringify(answers)
+            });
+
+            if (res.status === 201 || res.status === 200) {
+                try {
+                    message.success('提交成功');
+                    navigate('/res/' + res.data.id);
+                } catch (e) {
+                    console.error('e', e)
+                }
+            }
+        } catch (e: any) {
+            message.error(e.response?.data?.message || '系统繁忙，请稍后再试');
+        }
+    }
     return <div className="exam-container">
-        Exam: {id}
         {renderComponents(componentJson)}
-        <Button type="primary" className="btn">提交</Button>
+        <Button type="primary" className="btn" onClick={addAnswer}>提交</Button>
     </div>
 }
 

@@ -14,7 +14,7 @@ import {
 import { Question } from "./type";
 import { MaterialItem } from "./Material";
 import { useDrop } from "react-dnd";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import TextArea from "antd/es/input/TextArea";
 import { useForm } from "antd/es/form/Form";
 import { examFind, examSave } from "../../api";
@@ -108,11 +108,13 @@ export function Edit() {
     }
 
     const [form] = useForm();
+    const currentJson = useMemo(() => componentJson.find((item) => item.id === curQuestionId), [componentJson, curQuestionId]);
     useEffect(() => {
-        form.setFieldsValue(
-            componentJson.filter((item) => item.id === curQuestionId)[0]
-        );
-    }, [curQuestionId]);
+        const currentJson = componentJson.find((item) => item.id === curQuestionId);
+        if (currentJson) {
+            form.setFieldsValue(currentJson);
+        }
+    }, [componentJson, curQuestionId, form]);
 
     const [key, setKey] = useState<string>("json");
 
@@ -193,85 +195,80 @@ export function Edit() {
                     {key === "json" ? (
                         <pre>{JSON.stringify(componentJson, null, 4)}</pre>
                     ) : (
-                        // 根据 curQuesitonId 从 json 中找到对应的数据，用 Form 来回显s
+                        // 根据 curQuestionId 从 json 中找到对应的数据，用 Form 来回显s
                         curQuestionId &&
-                        componentJson
-                            .filter((item) => item.id === curQuestionId)
-                            .map((item, index) => {
-                                return (
-                                    <div key={index}>
-                                        <Form
-                                            style={{ padding: "20px" }}
-                                            initialValues={item}
-                                            onValuesChange={(changed, values) => {
-                                                setComponentJson((json) => {
-                                                    return json.map((cur) => {
-                                                        return cur.id === item.id
-                                                            ? {
-                                                                id: item.id,
-                                                                ...values,
-                                                                options:
-                                                                    typeof values.options === "string"
-                                                                        ? values.options?.split(",")
-                                                                        : values.options,
-                                                            }
-                                                            : cur;
-                                                    });
-                                                });
-                                            }}
+                            currentJson
+                            ? <div key={curQuestionId}>
+                                <Form
+                                    style={{ padding: "20px" }}
+                                    initialValues={currentJson}
+                                    onValuesChange={(changed, values) => {
+                                        setComponentJson((json) => {
+                                            return json.map((cur) => {
+                                                return cur.id === currentJson.id
+                                                    ? {
+                                                        id: currentJson.id,
+                                                        ...values,
+                                                        options:
+                                                            typeof values.options === "string"
+                                                                ? values.options?.split(",")
+                                                                : values.options,
+                                                    }
+                                                    : cur;
+                                            });
+                                        });
+                                    }}
+                                >
+                                    <Form.Item
+                                        label="问题"
+                                        name="question"
+                                        rules={[{ required: true, message: "请输入问题!" }]}
+                                    >
+                                        <Input />
+                                    </Form.Item>
+                                    <Form.Item
+                                        label="类型"
+                                        name="type"
+                                        rules={[{ required: true, message: "请选择类型!" }]}
+                                    >
+                                        <Radio.Group>
+                                            <Radio value="radio">单选题</Radio>
+                                            <Radio value="checkbox">多选题</Radio>
+                                            <Radio value="input">填空题</Radio>
+                                        </Radio.Group>
+                                    </Form.Item>
+                                    {currentJson.type !== "input" && (
+                                        <Form.Item
+                                            label="选项（逗号分割）"
+                                            name="options"
+                                            rules={[{ required: true, message: "请输入选项!" }]}
                                         >
-                                            <Form.Item
-                                                label="问题"
-                                                name="question"
-                                                rules={[{ required: true, message: "请输入问题!" }]}
-                                            >
-                                                <Input />
-                                            </Form.Item>
-                                            <Form.Item
-                                                label="类型"
-                                                name="type"
-                                                rules={[{ required: true, message: "请选择类型!" }]}
-                                            >
-                                                <Radio.Group>
-                                                    <Radio value="radio">单选题</Radio>
-                                                    <Radio value="checkbox">多选题</Radio>
-                                                    <Radio value="input">填空题</Radio>
-                                                </Radio.Group>
-                                            </Form.Item>
-                                            {item.type !== "input" && (
-                                                <Form.Item
-                                                    label="选项（逗号分割）"
-                                                    name="options"
-                                                    rules={[{ required: true, message: "请输入选项!" }]}
-                                                >
-                                                    <Input />
-                                                </Form.Item>
-                                            )}
-                                            <Form.Item
-                                                label="分数"
-                                                name="score"
-                                                rules={[{ required: true, message: "请输入分数!" }]}
-                                            >
-                                                <InputNumber />
-                                            </Form.Item>
-                                            <Form.Item
-                                                label="答案"
-                                                name="answer"
-                                                rules={[{ required: true, message: "请输入答案!" }]}
-                                            >
-                                                <Input />
-                                            </Form.Item>
-                                            <Form.Item
-                                                label="答案分析"
-                                                name="answerAnalyse"
-                                                rules={[{ required: true, message: "请输入答案分析!" }]}
-                                            >
-                                                <TextArea />
-                                            </Form.Item>
-                                        </Form>
-                                    </div>
-                                );
-                            })
+                                            <Input />
+                                        </Form.Item>
+                                    )}
+                                    <Form.Item
+                                        label="分数"
+                                        name="score"
+                                        rules={[{ required: true, message: "请输入分数!" }]}
+                                    >
+                                        <InputNumber />
+                                    </Form.Item>
+                                    <Form.Item
+                                        label="答案"
+                                        name="answer"
+                                        rules={[{ required: true, message: "请输入答案!" }]}
+                                    >
+                                        <Input />
+                                    </Form.Item>
+                                    <Form.Item
+                                        label="答案分析"
+                                        name="answerAnalyse"
+                                        rules={[{ required: true, message: "请输入答案分析!" }]}
+                                    >
+                                        <TextArea />
+                                    </Form.Item>
+                                </Form>
+                            </div> : null
                     )}
                 </div>
             </div>

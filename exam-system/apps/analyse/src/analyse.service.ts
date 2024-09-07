@@ -21,7 +21,7 @@ export class AnalyseService {
         examId,
       },
     });
-
+    console.log('rankList answers', answers);
     // 用 zAdd 加到对应的榜单
     for (const answer of answers) {
       const { id, score } = answer;

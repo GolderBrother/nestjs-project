@@ -2,21 +2,31 @@ import axios, { AxiosResponse, InternalAxiosRequestConfig } from "axios";
 import { ExamAdd, ExamSaveParams, RegisterUser, UpdatePassword } from "./types";
 import { message } from "antd";
 
+// 用户微服务
 const userServiceInstance = axios.create({
     baseURL: 'http://localhost:3001/',
     timeout: 3000
 });
 
+// 考卷微服务
 const examServiceInstance = axios.create({
     baseURL: 'http://localhost:3002/',
     timeout: 3000
 });
 
+// 答案微服务
 // 调用答案微服务的接口需要单独创建一个 axios 的实例
 const answerServiceInstance = axios.create({
     baseURL: 'http://localhost:3003/',
     timeout: 3000
 });
+
+// 分析微服务
+const analyseServiceInstance = axios.create({
+    baseURL: 'http://localhost:3004/',
+    timeout: 3000
+});
+
 
 const requestInterceptor = (config: InternalAxiosRequestConfig) => {
     // 在每次请求之前，带上token，加上authorization
@@ -66,10 +76,8 @@ export async function login(username: string, password: string) {
 }
 
 export async function registerCaptcha(email: string) {
-    return await userServiceInstance.get('/user/register-captcha', {
-        params: {
-            address: email
-        }
+    return await userServiceInstance.post('/user/register-captcha', {
+        email
     });
 }
 
@@ -80,7 +88,7 @@ export async function register(registerUser: RegisterUser) {
 export async function updatePasswordCaptcha(email: string) {
     return await userServiceInstance.get('/user/update_password/captcha', {
         params: {
-            address: email
+            email
         }
     });
 }
@@ -131,13 +139,22 @@ export async function answerFind(id: number) {
 }
 
 /**
+ * 新建答卷
+ * @param data 
+ * @returns 
+ */
+export async function answerAdd(data: { examId: number, content: string}) {
+    return await answerServiceInstance.post('/answer/add', data);
+}
+
+/**
  * 查看排行榜
  * @param examId 
  * @returns 
  */
 
 export async function getRanking(examId: number) {
-    return await answerServiceInstance.get('/analyse/ranking', {
+    return await analyseServiceInstance.get('/analyse/ranking', {
         params: {
             examId
         }
