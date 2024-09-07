@@ -1,9 +1,10 @@
-import { Button, message, Popconfirm, Radio } from "antd";
+import { Button, message, Popconfirm, Popover, Radio } from "antd";
 import "./index.css";
 import { useEffect, useMemo, useState } from "react";
 import { Exam } from "../../api/types";
 import { examDelete, examPublish, examUnPublish, getExamList as getExamListApi } from "../../api";
 import { ExamAddModal } from "./ExamAddModal";
+import { Link } from "react-router-dom";
 
 export function ExamList() {
     const [examList, setExamList] = useState<Array<Exam>>([])
@@ -14,7 +15,7 @@ export function ExamList() {
                 // 过滤出未删除的
                 setExamList(Array.isArray(res.data) ? res.data.filter(item => !item.isDelete) : [])
             }
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         } catch (e: any) {
             message.error(e.response?.data?.message || '系统繁忙，请稍后再试');
         }
@@ -79,7 +80,14 @@ export function ExamList() {
                             <p>{item.name}</p>
                             <div className="btns">
                                 <Button className="btn" type="primary" style={{ background: 'darkblue' }} onClick={() => changePublishState(item.id, item.isPublish)}>{item.isPublish ? '停止' : '发布'}</Button>
-                                <Button className="btn" type="primary" style={{ background: 'green' }}>编辑</Button>
+                                <Button className="btn" type="primary" style={{ background: 'green' }}>
+                                    <Link to={`/edit/${item.id}`}>编辑</Link>
+                                </Button>
+                                <Popover content={window.location.origin + '/exam/' + item.id} trigger="click">
+                                    <Button type="default">
+                                        考试链接
+                                    </Button>
+                                </Popover>
                                 <Popconfirm
                                     title="试卷删除"
                                     description="确认放入回收站吗？"

@@ -4,44 +4,55 @@ import { Register } from "../pages/Register";
 import { UpdatePassword } from "../pages/UpdatePassword";
 import { ExamList } from "../pages/ExamList";
 import { Edit } from "../pages/Edit";
+import { Exam } from "../pages/Exam";
 
 export function Aaa() {
-    return <div>aaa</div>;
+  return <div>aaa</div>;
 }
 
 export function Bbb() {
-    return <div>bbb</div>;
+  return <div>bbb</div>;
 }
 
 export function Layout() {
-    return <div>
-        <div><Link to="/aaa">to aaa</Link></div>
-        <div><Link to="/bbb">to bbb</Link></div>
-        <div>
-            <Outlet />
-        </div>
+  return (
+    <div>
+      <div>
+        <Link to="/aaa">to aaa</Link>
+      </div>
+      <div>
+        <Link to="/bbb">to bbb</Link>
+      </div>
+      <div>
+        <Outlet />
+      </div>
     </div>
+  );
 }
 
 export const ROUTES = [
-    {
-      path: "/",
-      element: <ExamList />
-    },
-    {
-      path: "login",
-      element: <Login />,
-    },
-    {
-      path: "register",
-      element: <Register />,
-    },
-    {
-      path: "update_password",
-      element: <UpdatePassword />,
-    },
-    {
-      path: "edit/:id",
-      element: <Edit />
-    }
-  ];
+  {
+    path: "/",
+    element: <ExamList />,
+  },
+  {
+    path: "login",
+    element: <Login />,
+  },
+  {
+    path: "register",
+    element: <Register />,
+  },
+  {
+    path: "update_password",
+    element: <UpdatePassword />,
+  },
+  {
+    path: "edit/:id",
+    element: <Edit />,
+  },
+  {
+    path: "exam/:id",
+    element: <Exam />,
+  },
+];

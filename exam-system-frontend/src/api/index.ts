@@ -12,6 +12,12 @@ const examServiceInstance = axios.create({
     timeout: 3000
 });
 
+// 调用答案微服务的接口需要单独创建一个 axios 的实例
+const answerServiceInstance = axios.create({
+    baseURL: 'http://localhost:3003/',
+    timeout: 3000
+});
+
 const requestInterceptor = (config: InternalAxiosRequestConfig) => {
     // 在每次请求之前，带上token，加上authorization
     const accessToken = localStorage.getItem('token')
@@ -21,6 +27,8 @@ const requestInterceptor = (config: InternalAxiosRequestConfig) => {
     return config;
 }
 examServiceInstance.interceptors.request.use(requestInterceptor)
+answerServiceInstance.interceptors.request.use(requestInterceptor)
+
 
 const responseInterceptor = (response: AxiosResponse) => {
     // 登录之后，拿到新的token，更新到本地存储中
@@ -49,6 +57,7 @@ const responseErrorInterceptor  = (error: any) => {
 }
 
 examServiceInstance.interceptors.response.use(responseInterceptor, responseErrorInterceptor)
+answerServiceInstance.interceptors.response.use(responseInterceptor, responseErrorInterceptor)
 
 export async function login(username: string, password: string) {
     return await userServiceInstance.post('/user/login', {
