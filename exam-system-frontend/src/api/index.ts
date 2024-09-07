@@ -129,3 +129,18 @@ export async function examSave(data: ExamSaveParams) {
 export async function answerFind(id: number) {
     return await answerServiceInstance.get('/answer/find/' + id);
 }
+
+/**
+ * 查看排行榜
+ * @param examId 
+ * @returns 
+ */
+
+export async function getRanking(examId: number) {
+    return await answerServiceInstance.get('/analyse/ranking', {
+        params: {
+            examId
+        }
+    });
+}
+

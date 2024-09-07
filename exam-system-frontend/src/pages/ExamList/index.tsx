@@ -5,6 +5,7 @@ import { Exam } from "../../api/types";
 import { examDelete, examPublish, examUnPublish, getExamList as getExamListApi } from "../../api";
 import { ExamAddModal } from "./ExamAddModal";
 import { Link } from "react-router-dom";
+import { RankingModal } from "./RankingModal";
 
 export function ExamList() {
     const [examList, setExamList] = useState<Array<Exam>>([])
@@ -15,7 +16,7 @@ export function ExamList() {
                 // 过滤出未删除的
                 setExamList(Array.isArray(res.data) ? res.data.filter(item => !item.isDelete) : [])
             }
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
         } catch (e: any) {
             message.error(e.response?.data?.message || '系统繁忙，请稍后再试');
         }
@@ -24,12 +25,12 @@ export function ExamList() {
         getExamList();
     }, [])
 
-    const [isExamAddModelOpen, setIsExamAddModelOpen] = useState(false);
+    const [isExamAddModalOpen, setIsExamAddModalOpen] = useState(false);
     const openExamAddMode = () => {
-        setIsExamAddModelOpen(true)
+        setIsExamAddModalOpen(true)
     }
     const closeExamAddMode = () => {
-        setIsExamAddModelOpen(false)
+        setIsExamAddModalOpen(false)
     }
     const onExamAddModalClose = () => {
         closeExamAddMode()
@@ -63,6 +64,14 @@ export function ExamList() {
         const examListData = Array.isArray(examList) ? examList : [];
         return examListData.filter(item => bin ? item.isDelete === true : item.isDelete === false)
     }, [bin, examList])
+
+    const [isRankingModalOpen, setIsRankingModalOpen] = useState(false);
+    // 记录当前的考试 id
+    const [curExamId, setCurExamId] = useState<number>();
+    const onRankingModalClose = () => {
+        setIsRankingModalOpen(false);
+    }
+
     return <div id="ExamList-container">
         <div className="header">
             <h1>考试系统</h1>
@@ -88,6 +97,13 @@ export function ExamList() {
                                         考试链接
                                     </Button>
                                 </Popover>
+                                <Button className="btn" type="primary" style={{ background: 'orange' }} onClick={() => {
+                                    setIsRankingModalOpen(true)
+                                    setCurExamId(item.id);
+                                }}>
+                                    排行榜
+                                </Button>
+                                <a href={`http://localhost:3003/answer/export?examId=${item.id}`}>导出所有答卷</a>
                                 <Popconfirm
                                     title="试卷删除"
                                     description="确认放入回收站吗？"
@@ -104,8 +120,14 @@ export function ExamList() {
             </div>
         </div>
         <ExamAddModal
-            isOpen={isExamAddModelOpen}
+            isOpen={isExamAddModalOpen}
             handleClose={onExamAddModalClose}
         />
+        <RankingModal
+            isOpen={isRankingModalOpen}
+            examId={curExamId}
+            handleClose={onRankingModalClose}
+        />
+
     </div>
 }
